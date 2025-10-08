@@ -1,6 +1,19 @@
 import React from 'react'
 
-const Header = ({ onAddNote, totalNotes, onExportNotes, onToggleSync }) => {
+const Header = ({ onAddNote, totalNotes, onExportNotes, onImportNotes, onSyncConfig }) => {
+  const handleImportClick = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = (e) => {
+      const file = e.target.files[0]
+      if (file) {
+        onImportNotes(file)
+      }
+    }
+    input.click()
+  }
+
   return (
     <header className="header">
       <div className="header-content">
@@ -24,11 +37,18 @@ const Header = ({ onAddNote, totalNotes, onExportNotes, onToggleSync }) => {
             💾 Exportar
           </button>
           <button 
-            onClick={onToggleSync} 
+            onClick={handleImportClick} 
             className="btn btn-secondary"
-            title="Sincronização (Ctrl+S)"
+            title="Importar arquivo JSON (Ctrl+I)"
           >
-            🔄 Sync
+            📥 Importar
+          </button>
+          <button 
+            onClick={onSyncConfig}
+            className="btn btn-secondary btn-icon"
+            title="Configurações de Sincronização"
+          >
+            ⚙️
           </button>
         </div>
       </div>

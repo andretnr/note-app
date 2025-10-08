@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import './styles/App.css'
 import useIndexedDB from './hooks/useIndexedDB'
-import useLocalSync from './hooks/useLocalSync'
 import Header from './components/Header'
 import SearchBar from './components/SearchBar'
 import NoteForm from './components/NoteForm'
 import NoteItem from './components/NoteItem'
-import SyncManager from './components/SyncManager'
+import SyncConfigModal from './components/SyncConfigModal'
 
 function App() {
   const { 
@@ -21,20 +20,12 @@ function App() {
     importNotes
   } = useIndexedDB()
 
-  const {
-    isEnabled: syncEnabled,
-    lastSync,
-    conflicts,
-    sync: manualSync,
-    toggleSync,
-    resolveConflict
-  } = useLocalSync(notes, { addNote, updateNote, deleteNote })
-
   const [searchTerm, setSearchTerm] = useState('')
   const [searchType, setSearchType] = useState('subject')
   const [showForm, setShowForm] = useState(false)
   const [editingNote, setEditingNote] = useState(null)
-  const [showSyncManager, setShowSyncManager] = useState(false)
+  const [importResult, setImportResult] = useState(null)
+  const [showSyncConfig, setShowSyncConfig] = useState(false)
 
   // Atalhos de teclado
   useEffect(() => {
@@ -47,9 +38,9 @@ function App() {
         e.preventDefault()
         exportNotesDB()
       }
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'i') {
         e.preventDefault()
-        manualSync()
+        handleImportClick()
       }
       if (e.key === 'Escape' && showForm) {
         setShowForm(false)
@@ -58,7 +49,7 @@ function App() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [showForm, exportNotesDB, manualSync])
+  }, [showForm, exportNotesDB])
 
   // Filtrar anotações localmente
   const filteredNotes = notes.filter(note => {
@@ -136,8 +127,38 @@ function App() {
     setEditingNote(null)
   }
 
-  const handleToggleSync = () => {
-    setShowSyncManager(!showSyncManager)
+  const handleImportClick = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = (e) => {
+      const file = e.target.files[0]
+      if (file) {
+        handleImportNotes(file)
+      }
+    }
+    input.click()
+  }
+
+  const handleImportNotes = async (file) => {
+    try {
+      const result = await importNotes(file)
+      setImportResult({
+        type: 'success',
+        message: `Importação concluída! ${result.imported} novas anotações, ${result.updated} atualizadas, ${result.skipped} ignoradas.`
+      })
+      
+      // Limpar mensagem após 5 segundos
+      setTimeout(() => setImportResult(null), 5000)
+    } catch (error) {
+      setImportResult({
+        type: 'error', 
+        message: `Erro na importação: ${error.message}`
+      })
+      
+      // Limpar mensagem após 5 segundos
+      setTimeout(() => setImportResult(null), 5000)
+    }
   }
 
   return (
@@ -146,7 +167,8 @@ function App() {
         onAddNote={handleAddNote}
         totalNotes={notes.length}
         onExportNotes={exportNotesDB}
-        onToggleSync={handleToggleSync}
+        onImportNotes={handleImportNotes}
+        onSyncConfig={() => setShowSyncConfig(true)}
       />
       
       <main className="main-content">
@@ -163,16 +185,10 @@ function App() {
           </div>
         )}
 
-        {showSyncManager && (
-          <SyncManager 
-            isEnabled={syncEnabled}
-            lastSync={lastSync}
-            conflicts={conflicts}
-            onToggleSync={toggleSync}
-            onManualSync={manualSync}
-            onResolveConflict={resolveConflict}
-            onClose={() => setShowSyncManager(false)}
-          />
+        {importResult && (
+          <div className={`import-message ${importResult.type === 'success' ? 'import-success' : 'import-error'}`}>
+            {importResult.type === 'success' ? '✅' : '❌'} {importResult.message}
+          </div>
         )}
 
         <div className="notes-container">
@@ -211,6 +227,16 @@ function App() {
           onSave={handleSaveNote}
           onCancel={handleCancelForm}
           isEditing={!!editingNote}
+        />
+      )}
+
+      {showSyncConfig && (
+        <SyncConfigModal
+          isOpen={showSyncConfig}
+          onClose={() => setShowSyncConfig(false)}
+          notes={notes}
+          importNotes={handleImportNotes}
+          exportNotes={exportNotesDB}
         />
       )}
     </div>

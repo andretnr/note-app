@@ -1,30 +1,43 @@
 # 📝 Bloco de Anotações com IndexedDB
 
-Sistema avançado de anotações com persistência local usando IndexedDB e sincronização entre navegadores.
+Sistema avançado de anotações com persistência local usando IndexedDB, tema escuro modern#### ⌨️ Atalhos de Teclado
+- `Ctrl + N` - **Nova anotação**
+- `Ctrl + E` - **Exportar dados**
+- `Ctrl + I` - **Importar arquivo**
+- `Escape` - **Fechar modais**
+
+#### ⚙️ Configurações de Sincronização
+1. Clique no ícone **⚙️** no header
+2. Escolha entre **Manual** ou **Automática**:
+   - **Manual**: Exportar/Importar arquivos JSON
+   - **Automática**: File System Access API (Chrome/Edge)
+3. Configure arquivo compartilhado para sync automático
+4. Monitore status e controle sincronização sincronização inteligente entre navegadores.
 
 ## ✨ Recursos Completos
 
 ### 🎯 Funcionalidades Principais
-- **✅ Interface Avançada**: Design moderno com foco na usabilidade e performance
-- **✅ IndexedDB**: Armazenamento ilimitado e muito mais rápido que localStorage
-- **✅ Sincronização Local**: Entre diferentes navegadores no mesmo dispositivo
-- **✅ Busca Otimizada**: Índices no banco para busca instantânea
-- **✅ Exportação/Importação**: Backup completo em JSON com versionamento
-- **✅ Resolução de Conflitos**: Sistema inteligente para gerenciar conflitos de dados
-- **✅ Atalhos de Teclado**: Ctrl+N, Ctrl+E, Ctrl+S e Escape
-- **✅ Performance**: Suporta milhares de anotações sem degradação
-- **✅ Offline First**: Funciona completamente offline após carregamento
-- **✅ Cross-Browser**: Dados compartilhados entre Chrome, Firefox, Safari, Edge
+- **✅ Interface Moderna**: Design dark theme elegante e responsivo
+- **✅ IndexedDB**: Armazenamento ilimitado e performance superior
+- **✅ Sincronização Inteligente**: Manual e automática entre navegadores
+- **✅ Busca Avançada**: Por assunto, conteúdo ou data com filtros
+- **✅ Exportação/Importação**: Backup completo em JSON com merge inteligente
+- **✅ Modal de Configurações**: Interface completa para gerenciar sincronização
+- **✅ Atalhos de Teclado**: Ctrl+N, Ctrl+E, Ctrl+I e Escape
+- **✅ Performance**: Otimizado para milhares de anotações
+- **✅ Offline First**: Funciona completamente offline
+- **✅ Cross-Browser**: Sincronização entre Chrome, Firefox, Safari, Edge
 
-### 📊 Estatísticas da Versão 2.0
-- **Componentes React**: 8 componentes modulares (+ SyncManager)
-- **Hooks Customizados**: useIndexedDB + useLocalSync para máxima performance
-- **Linhas de CSS**: +1200 linhas com animações e responsividade total
-- **Persistência**: IndexedDB com capacidade ilimitada
-- **Atalhos**: 3 atalhos de teclado (Nova, Exportar, Sync Manual)
-- **Arquitetura**: Sistema de banco com índices e transações
-- **Compatibilidade**: Todos os navegadores modernos
-- **Performance**: Otimizado para milhares de registros
+### 📊 Estatísticas da Versão 3.0
+- **Componentes React**: 9 componentes modulares (+ SyncConfigModal)
+- **Hooks Customizados**: useIndexedDB com sistema avançado de persistência
+- **Linhas de CSS**: +1400 linhas com tema escuro e animações
+- **Persistência**: IndexedDB com capacidade ilimitada e índices otimizados
+- **Sincronização**: Modal com abas Manual/Automática + File System Access API
+- **Atalhos**: 4 atalhos de teclado (Nova, Exportar, Importar, Modal)
+- **Arquitetura**: Sistema robusto com merge inteligente e resolução de conflitos
+- **Compatibilidade**: Todos os navegadores modernos + funcionalidades progressivas
+- **Performance**: Otimizado para milhares de registros com debounce automático
 
 ## 🚀 Opções de Execução
 
@@ -168,10 +181,12 @@ Você tem **duas opções** para usar o bloco de anotações:
 
 ## 🎨 Tecnologias Utilizadas
 
-- **React 18**: Biblioteca principal para UI
-- **Vite**: Ferramenta de build rápida
-- **CSS3**: Estilização com gradientes e animações
-- **localStorage**: Persistência de dados local
+- **React 18**: Biblioteca principal para UI com hooks avançados
+- **IndexedDB**: Banco de dados nativo do navegador com capacidade ilimitada
+- **Vite**: Build tool ultrarrápida com Hot Module Replacement
+- **CSS3**: Dark theme moderno com animações e responsividade total
+- **File System Access API**: Sincronização automática (Chrome/Edge)
+- **Web Storage API**: Configurações e cache de sincronização
 
 ## 📂 Estrutura do Projeto
 
@@ -275,5 +290,6 @@ Este projeto foi desenvolvido para uso pessoal e educacional. Sinta-se livre par
 
 **🎉 Desenvolvido com ❤️ em React para tornar suas anotações mais organizadas e acessíveis!**
 
-**📝 Versão atual**: 2.0 - Standalone Ready  
-**🗓️ Última atualização**: Outubro 2025
+**📝 Versão atual**: 3.0 - Dark Theme + Sync Modal  
+**🗓️ Última atualização**: Outubro 2025  
+**🎨 Novidades**: Tema escuro, modal de sincronização, File System Access API
