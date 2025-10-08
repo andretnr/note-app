@@ -157,6 +157,7 @@
             padding: 0.5rem;
             box-shadow: 0 4px 15px rgba(83, 52, 131, 0.3);
             border: 1px solid #533483;
+            flex-wrap: wrap;
         }
 
         .search-input {
@@ -185,9 +186,10 @@
             background: #2c2c54;
             color: #e8eaed;
             cursor: pointer;
-            min-width: 120px;
+            min-width: 110px;
             appearance: none;
             -webkit-appearance: none;
+            flex-shrink: 0;
         }
 
         /* Notes */
@@ -444,6 +446,20 @@
 
             .search-bar {
                 min-width: auto;
+            }
+
+            .search-input-group {
+                flex-direction: column;
+            }
+
+            .search-input {
+                order: 1;
+            }
+
+            .search-select {
+                order: 2;
+                min-width: auto;
+                width: 100%;
             }
         }
 
@@ -944,7 +960,7 @@
             );
         };
 
-        const SearchBar = ({ searchTerm, onSearchChange, searchType, onSearchTypeChange }) => {
+        const SearchBar = ({ searchTerm, onSearchChange, searchType, onSearchTypeChange, sortBy, onSortChange }) => {
             return (
                 <div className="search-bar">
                     <div className="search-input-group">
@@ -965,6 +981,16 @@
                             <option value="subject">Assunto</option>
                             <option value="content">Conteúdo</option>
                             <option value="date">Data</option>
+                        </select>
+                        <select
+                            value={sortBy}
+                            onChange={(e) => onSortChange(e.target.value)}
+                            className="search-select"
+                            title="Ordenar por"
+                        >
+                            <option value="date">📅 Por Data</option>
+                            <option value="category">📋 Por Categoria</option>
+                            <option value="subject">🔤 Por Assunto</option>
                         </select>
                     </div>
                 </div>
@@ -1116,25 +1142,43 @@
 
             const [searchTerm, setSearchTerm] = useState('');
             const [searchType, setSearchType] = useState('subject');
+            const [sortBy, setSortBy] = useState('date');
             const [showForm, setShowForm] = useState(false);
             const [editingNote, setEditingNote] = useState(null);
             const [importResult, setImportResult] = useState(null);
 
-            // Filtrar notas
-            const filteredNotes = notes.filter(note => {
-                if (!searchTerm.trim()) return true;
-                
-                if (searchType === 'subject') {
-                    return note.subject.toLowerCase().includes(searchTerm.toLowerCase());
-                } else if (searchType === 'date') {
-                    const noteDate = new Date(note.createdAt).toLocaleDateString('pt-BR');
-                    return noteDate.includes(searchTerm);
-                } else if (searchType === 'content') {
-                    return note.content.toLowerCase().includes(searchTerm.toLowerCase());
-                }
-                
-                return true;
-            });
+            // Filtrar e ordenar notas
+            const filteredAndSortedNotes = notes
+                .filter(note => {
+                    if (!searchTerm.trim()) return true;
+                    
+                    if (searchType === 'subject') {
+                        return note.subject.toLowerCase().includes(searchTerm.toLowerCase());
+                    } else if (searchType === 'date') {
+                        const noteDate = new Date(note.createdAt).toLocaleDateString('pt-BR');
+                        return noteDate.includes(searchTerm);
+                    } else if (searchType === 'content') {
+                        return note.content.toLowerCase().includes(searchTerm.toLowerCase());
+                    }
+                    
+                    return true;
+                })
+                .sort((a, b) => {
+                    if (sortBy === 'category') {
+                        // Primeiro por categoria, depois por data (mais recente primeiro)
+                        const categoryComparison = a.category.localeCompare(b.category);
+                        if (categoryComparison !== 0) return categoryComparison;
+                        return new Date(b.createdAt) - new Date(a.createdAt);
+                    } else if (sortBy === 'subject') {
+                        // Por assunto alfabético, depois por data
+                        const subjectComparison = a.subject.localeCompare(b.subject);
+                        if (subjectComparison !== 0) return subjectComparison;
+                        return new Date(b.createdAt) - new Date(a.createdAt);
+                    } else {
+                        // Por data (mais recente primeiro) - padrão
+                        return new Date(b.createdAt) - new Date(a.createdAt);
+                    }
+                });
 
             // Handlers
             const handleAddNote = () => {
@@ -1217,6 +1261,8 @@
                             onSearchChange={setSearchTerm}
                             searchType={searchType}
                             onSearchTypeChange={setSearchType}
+                            sortBy={sortBy}
+                            onSortChange={setSortBy}
                         />
 
                         {status && status.fallback && (
@@ -1243,8 +1289,14 @@
                             </div>
                         )}
 
+                        {sortBy === 'category' && filteredAndSortedNotes.length > 0 && (
+                            <div className="import-message" style={{background: 'linear-gradient(135deg, #8a2be2 0%, #6a5acd 100%)', color: '#fff', border: '1px solid #8a2be2'}}>
+                                📋 Anotações organizadas por categoria
+                            </div>
+                        )}
+
                         <div className="notes-container">
-                            {filteredNotes.length === 0 ? (
+                            {filteredAndSortedNotes.length === 0 ? (
                                 <div className="empty-state">
                                     {searchTerm ? (
                                         <div>
@@ -1260,7 +1312,7 @@
                                 </div>
                             ) : (
                                 <div className="notes-grid">
-                                    {filteredNotes.map(note => (
+                                    {filteredAndSortedNotes.map(note => (
                                         <NoteItem
                                             key={note.id}
                                             note={note}
