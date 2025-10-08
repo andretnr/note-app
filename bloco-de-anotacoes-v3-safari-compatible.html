@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 Bloco de Anotações - Safari Compatible v3.0</title>
+    
+    <!-- React e Babel via CDN - Versões compatíveis com Safari -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        /* Reset e Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e8eaed;
+            line-height: 1.6;
+            min-height: 100vh;
+            /* Safari fix for viewport height */
+            -webkit-text-size-adjust: 100%;
+        }
+
+        /* Safari backdrop-filter fallback */
+        @supports (-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px)) {
+            .backdrop-blur {
+                -webkit-backdrop-filter: blur(10px);
+                backdrop-filter: blur(10px);
+            }
+        }
+
+        /* App Container */
+        .app {
+            min-height: 100vh;
+            /* Safari specific viewport units */
+            min-height: -webkit-fill-available;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(15, 15, 35, 0.95);
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid #533483;
+            /* Safari specific properties */
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+        }
+
+        /* Safari backdrop-filter class */
+        .header.backdrop-blur {
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 0 1rem;
+        }
+
+        .app-title {
+            font-size: 2.5rem;
+            color: #e8eaed;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            /* Safari text-shadow fix */
+            text-shadow: 0 2px 10px rgba(138, 43, 226, 0.3);
+            -webkit-text-shadow: 0 2px 10px rgba(138, 43, 226, 0.3);
+        }
+
+        .header-stats {
+            font-size: 0.9rem;
+            color: #b8bcc8;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid #533483;
+            box-shadow: 0 2px 10px rgba(83, 52, 131, 0.3);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons - Safari compatibility fixes */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 0.9rem;
+            /* Safari specific */
+            appearance: none;
+            -webkit-appearance: none;
+            -webkit-border-radius: 8px;
+            -webkit-transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8a2be2 0%, #6a5acd 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            -webkit-transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(138, 43, 226, 0.6);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #2c2c54 0%, #40407a 100%);
+            color: #e8eaed;
+            border: 1px solid #533483;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #40407a 0%, #2c2c54 100%);
+            border-color: #8a2be2;
+            transform: translateY(-1px);
+            -webkit-transform: translateY(-1px);
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            min-width: auto;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            width: 100%;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            flex: 1;
+            min-width: 300px;
+            margin-bottom: 3rem;
+        }
+
+        .search-input-group {
+            display: flex;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            padding: 0.5rem;
+            box-shadow: 0 4px 15px rgba(83, 52, 131, 0.3);
+            border: 1px solid #533483;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 0.75rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            background: rgba(15, 15, 35, 0.8);
+            color: #e8eaed;
+            /* Safari specific */
+            appearance: none;
+            -webkit-appearance: none;
+            -webkit-border-radius: 8px;
+        }
+
+        .search-input::placeholder {
+            color: #b8bcc8;
+        }
+
+        /* Safari placeholder fix */
+        .search-input::-webkit-input-placeholder {
+            color: #b8bcc8;
+        }
+
+        .search-select {
+            border: none;
+            outline: none;
+            padding: 0.75rem;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            background: #2c2c54;
+            color: #e8eaed;
+            cursor: pointer;
+            min-width: 120px;
+            /* Safari specific */
+            appearance: none;
+            -webkit-appearance: none;
+            -webkit-border-radius: 8px;
+        }
+
+        /* Notes Container */
+        .notes-container {
+            min-height: 400px;
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            /* Safari grid fallback */
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-orient: horizontal;
+            -webkit-box-direction: normal;
+            -ms-flex-direction: row;
+            flex-direction: row;
+            -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+            display: grid;
+        }
+
+        .note-item {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 16px rgba(83, 52, 131, 0.3);
+            transition: all 0.3s ease;
+            border: 1px solid #533483;
+            /* Safari specific */
+            -webkit-border-radius: 12px;
+            -webkit-transition: all 0.3s ease;
+            min-width: 350px;
+            -webkit-box-flex: 1;
+            -ms-flex: 1 1 350px;
+            flex: 1 1 350px;
+        }
+
+        .note-item:hover {
+            transform: translateY(-2px);
+            -webkit-transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.4);
+            border-color: #8a2be2;
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .note-subject {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e8eaed;
+            line-height: 1.4;
+            flex: 1;
+            /* Safari text overflow */
+            word-wrap: break-word;
+            -webkit-hyphens: auto;
+            -ms-hyphens: auto;
+            hyphens: auto;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .note-btn {
+            padding: 0.25rem 0.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+            /* Safari specific */
+            appearance: none;
+            -webkit-appearance: none;
+            -webkit-border-radius: 4px;
+            -webkit-transition: all 0.2s ease;
+        }
+
+        .edit-btn {
+            background: #7b68ee;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #6a5acd;
+        }
+
+        .delete-btn {
+            background: #dc143c;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #b22222;
+        }
+
+        .note-content {
+            color: #c9ccd1;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            -webkit-hyphens: auto;
+            -ms-hyphens: auto;
+            hyphens: auto;
+        }
+
+        .note-footer {
+            border-top: 1px solid #533483;
+            padding-top: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .note-category {
+            background: linear-gradient(135deg, #8a2be2 0%, #6a5acd 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            /* Safari specific */
+            -webkit-border-radius: 12px;
+        }
+
+        .note-date {
+            color: #b8bcc8;
+            font-size: 0.8rem;
+        }
+
+        /* Modal Styles - Safari compatibility */
+        .note-form-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+            /* Safari specific */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .note-form {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(138, 43, 226, 0.3);
+            border: 1px solid #533483;
+            /* Safari specific */
+            -webkit-border-radius: 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .note-form h3 {
+            color: #e8eaed;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #e8eaed;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #533483;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: border-color 0.2s ease;
+            background: #0f0f23;
+            color: #e8eaed;
+            /* Safari specific */
+            appearance: none;
+            -webkit-appearance: none;
+            -webkit-border-radius: 8px;
+            -webkit-transition: border-color 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #8a2be2;
+            /* Safari focus ring */
+            -webkit-focus-ring-color: transparent;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        /* Sync Config Modal */
+        .sync-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+            /* Safari specific */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .sync-modal {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(138, 43, 226, 0.3);
+            border: 1px solid #533483;
+            /* Safari specific */
+            -webkit-border-radius: 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .sync-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #533483;
+        }
+
+        .sync-modal-header h2 {
+            margin: 0;
+            color: #e8eaed;
+            font-size: 1.25rem;
+        }
+
+        .close-modal-btn {
+            background: none;
+            border: none;
+            color: #b8bcc8;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+            /* Safari specific */
+            appearance: none;
+            -webkit-appearance: none;
+            -webkit-border-radius: 4px;
+            -webkit-transition: background-color 0.2s ease;
+        }
+
+        .close-modal-btn:hover {
+            background: #2c2c54;
+            color: #e8eaed;
+        }
+
+        .sync-tabs {
+            display: flex;
+            border-bottom: 1px solid #533483;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: transparent;
+            color: #b8bcc8;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            /* Safari specific */
+            appearance: none;
+            -webkit-appearance: none;
+            -webkit-transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            background: #2c2c54;
+            color: #e8eaed;
+        }
+
+        .tab-btn.active {
+            background: #8a2be2;
+            color: white;
+            font-weight: 600;
+        }
+
+        .sync-content {
+            padding: 2rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #b8bcc8;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #c9ccd1;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Import Messages */
+        .import-message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 500;
+            animation: fadeIn 0.3s ease-in-out;
+            /* Safari specific */
+            -webkit-border-radius: 8px;
+            -webkit-animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .import-success {
+            background: linear-gradient(135deg, #228b22 0%, #32cd32 100%);
+            color: #f0fff0;
+            border: 1px solid #32cd32;
+        }
+
+        .import-error {
+            background: linear-gradient(135deg, #8b0000 0%, #dc143c 100%);
+            color: #ffe4e1;
+            border: 1px solid #dc143c;
+        }
+
+        /* Safari keyframe animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @-webkit-keyframes fadeIn {
+            from { opacity: 0; -webkit-transform: translateY(-10px); }
+            to { opacity: 1; -webkit-transform: translateY(0); }
+        }
+
+        /* Safari scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #2c2c54;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #533483;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8a2be2;
+        }
+
+        /* Responsive - Safari specific fixes */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-actions {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .notes-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                /* Safari flex fallback */
+                -webkit-box-orient: vertical;
+                -webkit-box-direction: normal;
+                -ms-flex-direction: column;
+                flex-direction: column;
+            }
+
+            .note-item {
+                min-width: auto;
+                -webkit-box-flex: 1;
+                -ms-flex: 1;
+                flex: 1;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .search-bar {
+                min-width: auto;
+            }
+
+            .sync-modal {
+                margin: 1rem;
+                max-width: none;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        /* Safari iOS specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            .app {
+                min-height: -webkit-fill-available;
+            }
+            
+            .search-input, .form-group input, .form-group textarea {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            .btn {
+                -webkit-tap-highlight-color: transparent;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback, useRef } = React;
+
+        // Safari-compatible IndexedDB Wrapper
+        class NotesDB {
+            constructor() {
+                this.dbName = 'NotesAppDB';
+                this.version = 1;
+                this.storeName = 'notes';
+                this.db = null;
+                this.isReady = false;
+                // Safari detection mais robusta
+                this.isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+                this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                console.log('🍎 Safari detectado:', this.isSafari);
+            }
+
+            async init() {
+                // Check IndexedDB support com fallback para Safari
+                if (!window.indexedDB) {
+                    console.error('❌ IndexedDB não suportado');
+                    throw new Error('IndexedDB não é suportado neste navegador. Use um navegador mais recente.');
+                }
+
+                // Safari: Verificar se há suporte completo
+                if (this.isSafari) {
+                    console.log('🍎 Inicializando para Safari...');
+                    try {
+                        // Teste rápido do IndexedDB no Safari
+                        const testDB = indexedDB.open('test-safari-db', 1);
+                        await new Promise((resolve, reject) => {
+                            testDB.onsuccess = () => {
+                                testDB.result.close();
+                                indexedDB.deleteDatabase('test-safari-db');
+                                resolve();
+                            };
+                            testDB.onerror = reject;
+                            setTimeout(() => reject(new Error('Timeout Safari')), 3000);
+                        });
+                    } catch (error) {
+                        console.error('❌ Safari IndexedDB test failed:', error);
+                        throw new Error('Safari não suporta IndexedDB completamente. Tente atualizar o navegador.');
+                    }
+                }
+
+                return new Promise((resolve, reject) => {
+                    let timeoutId;
+                    
+                    // Timeout mais curto para Safari
+                    if (this.isSafari || this.isIOS) {
+                        timeoutId = setTimeout(() => {
+                            reject(new Error('Timeout: Safari demorou muito para abrir IndexedDB'));
+                        }, 5000);
+                    }
+                    
+                    const request = indexedDB.open(this.dbName, this.version);
+                    
+                    request.onerror = () => {
+                        clearTimeout(timeoutId);
+                        console.error('❌ Erro ao abrir IndexedDB:', request.error);
+                        reject(new Error(`Erro IndexedDB: ${request.error?.message || 'Desconhecido'}`));
+                    };
+                    
+                    request.onsuccess = () => {
+                        clearTimeout(timeoutId);
+                        this.db = request.result;
+                        this.isReady = true;
+                        
+                        // Safari: Adicionar handlers específicos
+                        if (this.isSafari) {
+                            this.db.onerror = (event) => {
+                                console.error('🍎 Safari IndexedDB error:', event);
+                            };
+                            
+                            // Safari: Verificar se pode criar transações
+                            try {
+                                const testTransaction = this.db.transaction([this.storeName], 'readonly');
+                                testTransaction.oncomplete = () => console.log('🍎 Safari transaction test OK');
+                                testTransaction.onerror = (e) => console.error('🍎 Safari transaction test failed:', e);
+                            } catch (e) {
+                                console.error('🍎 Safari transaction creation failed:', e);
+                            }
+                        }
+                        
+                        console.log('✅ IndexedDB inicializado com sucesso');
+                        resolve(this.db);
+                    };
+                    
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        
+                        try {
+                            if (!db.objectStoreNames.contains(this.storeName)) {
+                                const store = db.createObjectStore(this.storeName, { keyPath: 'id' });
+                                store.createIndex('subject', 'subject', { unique: false });
+                                store.createIndex('category', 'category', { unique: false });
+                                store.createIndex('createdAt', 'createdAt', { unique: false });
+                                console.log('📋 Object store e índices criados');
+                            }
+                        } catch (error) {
+                            console.error('❌ Erro ao criar store:', error);
+                            reject(error);
+                        }
+                    };
+                    
+                    request.onblocked = () => {
+                        console.warn('⚠️ IndexedDB bloqueado - feche outras abas');
+                    };
+                });
+            }
+
+            async getAllNotes() {
+                if (!this.isReady) await this.init();
+                
+                return new Promise((resolve, reject) => {
+                    try {
+                        const transaction = this.db.transaction([this.storeName], 'readonly');
+                        const store = transaction.objectStore(this.storeName);
+                        const request = store.getAll();
+                        
+                        // Safari: Handler específico
+                        if (this.isSafari || this.isIOS) {
+                            const timeoutId = setTimeout(() => {
+                                if (request.readyState !== 'done') {
+                                    console.error('🍎 Safari timeout on getAllNotes');
+                                    reject(new Error('Safari: Timeout ao buscar anotações'));
+                                }
+                            }, 8000);
+                            
+                            request.onsuccess = () => {
+                                clearTimeout(timeoutId);
+                                const notes = request.result || [];
+                                notes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                                resolve(notes);
+                            };
+                            
+                            request.onerror = () => {
+                                clearTimeout(timeoutId);
+                                console.error('🍎 Safari erro ao buscar:', request.error);
+                                reject(new Error(`Safari: ${request.error?.message || 'Erro desconhecido'}`));
+                            };
+                        } else {
+                            // Outros navegadores
+                            request.onsuccess = () => {
+                                const notes = request.result || [];
+                                notes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                                resolve(notes);
+                            };
+                            
+                            request.onerror = () => {
+                                console.error('Erro ao buscar anotações:', request.error);
+                                reject(request.error);
+                            };
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            }
+
+            async saveNote(note) {
+                if (!this.isReady) await this.init();
+                
+                return new Promise((resolve, reject) => {
+                    try {
+                        const transaction = this.db.transaction([this.storeName], 'readwrite');
+                        const store = transaction.objectStore(this.storeName);
+                        
+                        const noteWithTimestamp = {
+                            ...note,
+                            lastModified: new Date().toISOString()
+                        };
+                        
+                        const request = store.put(noteWithTimestamp);
+                        
+                        request.onsuccess = () => resolve(noteWithTimestamp);
+                        request.onerror = () => {
+                            console.error('Erro ao salvar anotação:', request.error);
+                            reject(request.error);
+                        };
+                        
+                        // Safari specific timeout
+                        if (this.isSafari) {
+                            setTimeout(() => {
+                                if (request.readyState !== 'done') {
+                                    reject(new Error('Timeout no Safari'));
+                                }
+                            }, 5000);
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            }
+
+            async deleteNote(id) {
+                if (!this.isReady) await this.init();
+                
+                return new Promise((resolve, reject) => {
+                    try {
+                        const transaction = this.db.transaction([this.storeName], 'readwrite');
+                        const store = transaction.objectStore(this.storeName);
+                        const request = store.delete(id);
+                        
+                        request.onsuccess = () => resolve(true);
+                        request.onerror = () => {
+                            console.error('Erro ao deletar anotação:', request.error);
+                            reject(request.error);
+                        };
+                        
+                        // Safari specific timeout
+                        if (this.isSafari) {
+                            setTimeout(() => {
+                                if (request.readyState !== 'done') {
+                                    reject(new Error('Timeout no Safari'));
+                                }
+                            }, 5000);
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            }
+
+            async exportNotes() {
+                try {
+                    const notes = await this.getAllNotes();
+                    const exportData = {
+                        notes,
+                        timestamp: new Date().toISOString(),
+                        version: '3.0-safari',
+                        source: 'standalone-safari',
+                        totalNotes: notes.length,
+                        browser: this.isSafari ? 'Safari' : 'Other'
+                    };
+                    return exportData;
+                } catch (error) {
+                    console.error('Erro ao exportar:', error);
+                    throw error;
+                }
+            }
+
+            async importNotes(importData, mergeStrategy = 'smart') {
+                if (!importData.notes || !Array.isArray(importData.notes)) {
+                    throw new Error('Dados de importação inválidos');
+                }
+
+                try {
+                    const existingNotes = await this.getAllNotes();
+                    const existingIds = new Set(existingNotes.map(note => note.id));
+                    
+                    let imported = 0;
+                    let updated = 0;
+                    let skipped = 0;
+
+                    for (const importNote of importData.notes) {
+                        if (existingIds.has(importNote.id)) {
+                            if (mergeStrategy === 'smart') {
+                                const existing = existingNotes.find(n => n.id === importNote.id);
+                                const existingTime = new Date(existing.lastModified || existing.createdAt);
+                                const importTime = new Date(importNote.lastModified || importNote.createdAt);
+                                
+                                if (importTime > existingTime) {
+                                    await this.saveNote(importNote);
+                                    updated++;
+                                } else {
+                                    skipped++;
+                                }
+                            }
+                        } else {
+                            await this.saveNote(importNote);
+                            imported++;
+                        }
+                        
+                        // Safari: Add small delay between operations
+                        if (this.isSafari) {
+                            await new Promise(resolve => setTimeout(resolve, 10));
+                        }
+                    }
+
+                    return { imported, updated, skipped, total: importData.notes.length };
+                } catch (error) {
+                    console.error('Erro ao importar:', error);
+                    throw error;
+                }
+            }
+        }
+
+        // Safari-compatible useIndexedDB Hook with localStorage fallback
+        const useIndexedDB = () => {
+            const [notes, setNotes] = useState([]);
+            const [isLoading, setIsLoading] = useState(true);
+            const [error, setError] = useState(null);
+            const [usingFallback, setUsingFallback] = useState(false);
+            const dbRef = useRef(null);
+
+            // Fallback para localStorage no Safari
+            const loadFromLocalStorage = () => {
+                try {
+                    const stored = localStorage.getItem('safari-notes-fallback');
+                    if (stored) {
+                        const parsed = JSON.parse(stored);
+                        return Array.isArray(parsed) ? parsed : [];
+                    }
+                } catch (e) {
+                    console.error('Erro ao carregar localStorage:', e);
+                }
+                return [];
+            };
+
+            const saveToLocalStorage = (notes) => {
+                try {
+                    localStorage.setItem('safari-notes-fallback', JSON.stringify(notes));
+                    console.log('💾 Salvo no localStorage (fallback)');
+                } catch (e) {
+                    console.error('Erro ao salvar localStorage:', e);
+                }
+            };
+
+            useEffect(() => {
+                const initDB = async () => {
+                    try {
+                        dbRef.current = new NotesDB();
+                        await dbRef.current.init();
+                        
+                        const allNotes = await dbRef.current.getAllNotes();
+                        setNotes(allNotes);
+                        setIsLoading(false);
+                        setUsingFallback(false);
+                        
+                        console.log(`📋 Carregadas ${allNotes.length} anotações do IndexedDB`);
+                    } catch (err) {
+                        console.error('❌ IndexedDB falhou, usando localStorage fallback:', err);
+                        
+                        // Safari fallback: usar localStorage
+                        const fallbackNotes = loadFromLocalStorage();
+                        setNotes(fallbackNotes);
+                        setUsingFallback(true);
+                        setIsLoading(false);
+                        setError(`IndexedDB indisponível (${err.message}). Usando armazenamento limitado.`);
+                        
+                        console.log(`📋 Carregadas ${fallbackNotes.length} anotações do localStorage (fallback)`);
+                    }
+                };
+
+                initDB();
+            }, []);
+
+            const addNote = useCallback(async (noteData) => {
+                try {
+                    const newNote = {
+                        ...noteData,
+                        id: Date.now() + Math.random(), // Safari-safe unique ID
+                        createdAt: new Date().toISOString(),
+                        lastModified: new Date().toISOString()
+                    };
+
+                    if (usingFallback) {
+                        // Fallback: localStorage
+                        const updatedNotes = [newNote, ...notes];
+                        saveToLocalStorage(updatedNotes);
+                        setNotes(updatedNotes);
+                        return newNote;
+                    } else if (dbRef.current) {
+                        // IndexedDB normal
+                        const savedNote = await dbRef.current.saveNote(newNote);
+                        setNotes(prev => [savedNote, ...prev]);
+                        return savedNote;
+                    } else {
+                        throw new Error('Sistema de armazenamento não disponível');
+                    }
+                } catch (err) {
+                    console.error('Erro ao adicionar anotação:', err);
+                    setError(err.message);
+                    throw err;
+                }
+            }, [notes, usingFallback]);
+
+            const updateNote = useCallback(async (id, updates) => {
+                try {
+                    if (!id || (typeof id !== 'number' && typeof id !== 'string')) {
+                        throw new Error('ID da anotação inválido');
+                    }
+                    
+                    const existingNote = notes.find(note => note.id === id);
+                    if (!existingNote) {
+                        throw new Error('Anotação não encontrada');
+                    }
+
+                    const updatedNote = {
+                        ...existingNote,
+                        ...updates,
+                        id: existingNote.id,
+                        updatedAt: new Date().toISOString(),
+                        lastModified: new Date().toISOString()
+                    };
+
+                    if (usingFallback) {
+                        // Fallback: localStorage
+                        const updatedNotes = notes.map(note => note.id === id ? updatedNote : note);
+                        saveToLocalStorage(updatedNotes);
+                        setNotes(updatedNotes);
+                        return updatedNote;
+                    } else if (dbRef.current) {
+                        // IndexedDB normal
+                        const savedNote = await dbRef.current.saveNote(updatedNote);
+                        setNotes(prev => prev.map(note => note.id === id ? savedNote : note));
+                        return savedNote;
+                    } else {
+                        throw new Error('Sistema de armazenamento não disponível');
+                    }
+                } catch (err) {
+                    console.error('Erro ao atualizar anotação:', err);
+                    setError(err.message);
+                    throw err;
+                }
+            }, [notes, usingFallback]);
+
+            const deleteNote = useCallback(async (id) => {
+                try {
+                    if (usingFallback) {
+                        // Fallback: localStorage
+                        const updatedNotes = notes.filter(note => note.id !== id);
+                        saveToLocalStorage(updatedNotes);
+                        setNotes(updatedNotes);
+                        return true;
+                    } else if (dbRef.current) {
+                        // IndexedDB normal
+                        await dbRef.current.deleteNote(id);
+                        setNotes(prev => prev.filter(note => note.id !== id));
+                        return true;
+                    } else {
+                        throw new Error('Sistema de armazenamento não disponível');
+                    }
+                } catch (err) {
+                    console.error('Erro ao deletar anotação:', err);
+                    setError(err.message);
+                    throw err;
+                }
+            }, [notes, usingFallback]);
+
+            const exportNotes = useCallback(async () => {
+                if (!dbRef.current) return;
+
+                try {
+                    const exportData = await dbRef.current.exportNotes();
+                    
+                    const dataStr = JSON.stringify(exportData, null, 2);
+                    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+                    const exportFileDefaultName = `anotacoes_safari_backup_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`;
+                    
+                    // Safari-compatible download
+                    if (navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1) {
+                        // Safari specific download
+                        const link = document.createElement('a');
+                        link.setAttribute('href', dataUri);
+                        link.setAttribute('download', exportFileDefaultName);
+                        link.style.display = 'none';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    } else {
+                        // Other browsers
+                        const linkElement = document.createElement('a');
+                        linkElement.setAttribute('href', dataUri);
+                        linkElement.setAttribute('download', exportFileDefaultName);
+                        linkElement.click();
+                    }
+                    
+                    console.log(`📤 Exportadas ${exportData.totalNotes} anotações`);
+                    return exportData;
+                } catch (err) {
+                    console.error('Erro ao exportar:', err);
+                    setError(err.message);
+                    throw err;
+                }
+            }, []);
+
+            const importNotes = useCallback(async (file) => {
+                if (!dbRef.current || !file) return;
+
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = async (e) => {
+                        try {
+                            const importData = JSON.parse(e.target.result);
+                            const result = await dbRef.current.importNotes(importData, 'smart');
+                            
+                            const allNotes = await dbRef.current.getAllNotes();
+                            setNotes(allNotes);
+                            
+                            console.log(`📥 Importação concluída:`, result);
+                            resolve(result);
+                        } catch (error) {
+                            console.error('Erro ao importar:', error);
+                            setError(error.message);
+                            reject(error);
+                        }
+                    };
+                    
+                    reader.onerror = () => {
+                        const error = new Error('Erro ao ler arquivo');
+                        setError(error.message);
+                        reject(error);
+                    };
+                    
+                    reader.readAsText(file);
+                });
+            }, []);
+
+            return {
+                notes,
+                isLoading,
+                error,
+                addNote,
+                updateNote,
+                deleteNote,
+                exportNotes,
+                importNotes,
+                clearError: () => setError(null),
+                totalNotes: notes.length,
+                usingFallback
+            };
+        };
+
+        // Components (same as before, no changes needed for Safari compatibility in React components)
+        const Header = ({ onAddNote, totalNotes, onExportNotes, onImportNotes, onSyncConfig }) => {
+            const handleImportClick = () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        onImportNotes(file);
+                    }
+                };
+                input.click();
+            };
+
+            return (
+                <header className="header backdrop-blur">
+                    <div className="header-content">
+                        <h1 className="app-title">📝 Bloco de Anotações</h1>
+                        <div className="header-stats">
+                            <span className="note-count">{totalNotes} anotações</span>
+                        </div>
+                        <div className="header-actions">
+                            <button 
+                                onClick={onAddNote} 
+                                className="btn btn-primary"
+                                title="Nova anotação (Ctrl+N)"
+                            >
+                                ➕ Nova
+                            </button>
+                            <button 
+                                onClick={onExportNotes} 
+                                className="btn btn-secondary"
+                                title="Exportar (Ctrl+E)"
+                            >
+                                💾 Exportar
+                            </button>
+                            <button 
+                                onClick={handleImportClick} 
+                                className="btn btn-secondary"
+                                title="Importar arquivo JSON (Ctrl+I)"
+                            >
+                                📥 Importar
+                            </button>
+                            <button 
+                                onClick={onSyncConfig}
+                                className="btn btn-secondary btn-icon"
+                                title="Configurações de Sincronização"
+                            >
+                                ⚙️
+                            </button>
+                        </div>
+                    </div>
+                </header>
+            );
+        };
+
+        const SearchBar = ({ searchTerm, onSearchChange, searchType, onSearchTypeChange }) => {
+            return (
+                <div className="search-bar">
+                    <div className="search-input-group">
+                        <input
+                            type="text"
+                            placeholder={searchType === 'subject' ? 'Buscar por assunto...' : 
+                                        searchType === 'date' ? 'Buscar por data (dd/mm/aaaa)...' : 
+                                        'Buscar no conteúdo...'}
+                            value={searchTerm}
+                            onChange={(e) => onSearchChange(e.target.value)}
+                            className="search-input"
+                        />
+                        <select
+                            value={searchType}
+                            onChange={(e) => onSearchTypeChange(e.target.value)}
+                            className="search-select"
+                        >
+                            <option value="subject">Por Assunto</option>
+                            <option value="content">Por Conteúdo</option>
+                            <option value="date">Por Data</option>
+                        </select>
+                    </div>
+                </div>
+            );
+        };
+
+        const NoteForm = ({ note, onSave, onCancel, isEditing }) => {
+            const [subject, setSubject] = useState(note?.subject || '');
+            const [content, setContent] = useState(note?.content || '');
+            const [category, setCategory] = useState(note?.category || 'geral');
+
+            useEffect(() => {
+                if (note) {
+                    setSubject(note.subject || '');
+                    setContent(note.content || '');
+                    setCategory(note.category || 'geral');
+                } else {
+                    setSubject('');
+                    setContent('');
+                    setCategory('geral');
+                }
+            }, [note]);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                
+                if (subject.trim() && content.trim()) {
+                    const noteData = {
+                        subject: subject.trim(),
+                        content: content.trim(),
+                        category: category,
+                        updatedAt: new Date().toISOString()
+                    };
+
+                    if (isEditing && note?.id) {
+                        noteData.id = note.id;
+                        noteData.createdAt = note.createdAt;
+                    }
+
+                    onSave(noteData);
+                    
+                    if (!isEditing) {
+                        setSubject('');
+                        setContent('');
+                        setCategory('geral');
+                    }
+                }
+            };
+
+            const handleOverlayClick = (e) => {
+                if (e.target === e.currentTarget) {
+                    onCancel();
+                }
+            };
+
+            return (
+                <div className="note-form-overlay" onClick={handleOverlayClick}>
+                    <form onSubmit={handleSubmit} className="note-form" onClick={(e) => e.stopPropagation()}>
+                        <h3>{isEditing ? 'Editar Anotação' : 'Nova Anotação'}</h3>
+                        
+                        <div className="form-group">
+                            <label htmlFor="subject">Assunto:</label>
+                            <input
+                                type="text"
+                                id="subject"
+                                value={subject}
+                                onChange={(e) => setSubject(e.target.value)}
+                                placeholder="Digite o assunto da anotação"
+                                autoFocus
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="category">Categoria:</label>
+                            <select
+                                id="category"
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            >
+                                <option value="geral">📋 Geral</option>
+                                <option value="trabalho">💼 Trabalho</option>
+                                <option value="pessoal">👤 Pessoal</option>
+                                <option value="estudo">📚 Estudo</option>
+                                <option value="ideias">💡 Ideias</option>
+                                <option value="tarefas">✅ Tarefas</option>
+                                <option value="compras">🛒 Compras</option>
+                                <option value="viagem">✈️ Viagem</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="content">Conteúdo:</label>
+                            <textarea
+                                id="content"
+                                value={content}
+                                onChange={(e) => setContent(e.target.value)}
+                                placeholder="Digite o conteúdo da anotação"
+                                required
+                                rows={6}
+                            />
+                        </div>
+
+                        <div className="form-actions">
+                            <button type="button" onClick={onCancel} className="btn btn-secondary">
+                                Cancelar
+                            </button>
+                            <button type="submit" className="btn btn-primary">
+                                {isEditing ? 'Atualizar' : 'Salvar'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            );
+        };
+
+        const NoteItem = ({ note, onEdit, onDelete }) => {
+            const formatDate = (dateString) => {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+            };
+
+            const getCategoryIcon = (category) => {
+                const icons = {
+                    'geral': '📋',
+                    'trabalho': '💼',
+                    'pessoal': '👤',
+                    'estudo': '📚',
+                    'ideias': '💡',
+                    'tarefas': '✅',
+                    'compras': '🛒',
+                    'viagem': '✈️'
+                };
+                return icons[category] || '📋';
+            };
+
+            return (
+                <div className="note-item">
+                    <div className="note-header">
+                        <div className="note-subject">{note.subject}</div>
+                        <div className="note-actions">
+                            <button
+                                onClick={() => onEdit(note)}
+                                className="note-btn edit-btn"
+                                title="Editar anotação"
+                            >
+                                ✏️
+                            </button>
+                            <button
+                                onClick={() => onDelete(note.id)}
+                                className="note-btn delete-btn"
+                                title="Excluir anotação"
+                            >
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                    <div className="note-content">{note.content}</div>
+                    <div className="note-footer">
+                        <div className="note-category">
+                            {getCategoryIcon(note.category)} {note.category}
+                        </div>
+                        <div className="note-date">
+                            {formatDate(note.createdAt)}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const SyncConfigModal = ({ isOpen, onClose }) => {
+            const [activeTab, setActiveTab] = useState('manual');
+
+            const handleOverlayClick = (e) => {
+                if (e.target === e.currentTarget) {
+                    onClose();
+                }
+            };
+
+            if (!isOpen) return null;
+
+            return (
+                <div className="sync-modal-overlay" onClick={handleOverlayClick}>
+                    <div className="sync-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="sync-modal-header">
+                            <h2>⚙️ Configurações de Sincronização</h2>
+                            <button onClick={onClose} className="close-modal-btn">✕</button>
+                        </div>
+
+                        <div className="sync-tabs">
+                            <button 
+                                className={`tab-btn ${activeTab === 'manual' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('manual')}
+                            >
+                                📋 Manual
+                            </button>
+                            <button 
+                                className={`tab-btn ${activeTab === 'info' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('info')}
+                            >
+                                ℹ️ Informações
+                            </button>
+                        </div>
+
+                        <div className="sync-content">
+                            {activeTab === 'manual' && (
+                                <div>
+                                    <h3>📋 Sincronização Manual</h3>
+                                    <p style={{color: '#c9ccd1', marginBottom: '1.5rem'}}>
+                                        O IndexedDB é isolado por navegador. Use os botões Exportar/Importar 
+                                        para transferir anotações entre diferentes navegadores.
+                                    </p>
+                                    
+                                    <div style={{background: '#0f0f23', padding: '1rem', borderRadius: '8px', marginBottom: '1rem'}}>
+                                        <strong style={{color: '#e8eaed'}}>Como Sincronizar:</strong>
+                                        <ol style={{color: '#c9ccd1', marginTop: '0.5rem', paddingLeft: '1.5rem'}}>
+                                            <li>No Navegador A: Clique em "💾 Exportar"</li>
+                                            <li>No Navegador B: Clique em "📥 Importar"</li>
+                                            <li>Selecione o arquivo JSON exportado</li>
+                                            <li>Pronto! Merge inteligente aplicado</li>
+                                        </ol>
+                                    </div>
+
+                                    <div style={{background: '#228b22', color: '#f0fff0', padding: '1rem', borderRadius: '8px', border: '1px solid #32cd32'}}>
+                                        <strong>💡 Dica:</strong> O sistema compara datas automaticamente e mantém sempre a versão mais recente de cada anotação!
+                                    </div>
+                                    
+                                    {/Safari/.test(navigator.userAgent) && (
+                                        <div style={{background: '#8b0000', color: '#ffe4e1', padding: '1rem', borderRadius: '8px', border: '1px solid #dc143c', marginTop: '1rem'}}>
+                                            <strong>🍎 Safari:</strong> Versão otimizada para melhor compatibilidade com Safari!
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {activeTab === 'info' && (
+                                <div>
+                                    <h3>ℹ️ Sobre o Armazenamento</h3>
+                                    <div style={{color: '#c9ccd1', lineHeight: '1.6'}}>
+                                        <p style={{marginBottom: '1rem'}}>
+                                            <strong>IndexedDB</strong> é um banco de dados nativo do navegador que oferece:
+                                        </p>
+                                        <ul style={{marginLeft: '1.5rem', marginBottom: '1.5rem'}}>
+                                            <li>✅ Capacidade ilimitada de armazenamento</li>
+                                            <li>✅ Performance superior ao localStorage</li>
+                                            <li>✅ Funciona completamente offline</li>
+                                            <li>✅ Dados seguros no seu dispositivo</li>
+                                            <li>✅ Compatível com Safari (versão otimizada)</li>
+                                        </ul>
+
+                                        <div style={{background: '#8b0000', color: '#ffe4e1', padding: '1rem', borderRadius: '8px', border: '1px solid #dc143c', marginBottom: '1rem'}}>
+                                            <strong>⚠️ Limitação:</strong> Por segurança, cada navegador mantém seus próprios dados isolados.
+                                        </div>
+
+                                        <p>
+                                            Por isso criamos as funções de <strong>Exportar/Importar</strong> para você ter controle total sobre seus dados e poder usá-los em qualquer navegador!
+                                        </p>
+                                        
+                                        {/Safari/.test(navigator.userAgent) && (
+                                            <div style={{background: '#228b22', color: '#f0fff0', padding: '1rem', borderRadius: '8px', border: '1px solid #32cd32', marginTop: '1rem'}}>
+                                                <strong>🍎 Detectado Safari:</strong> Esta versão foi especialmente otimizada para o Safari com timeouts e fallbacks específicos!
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Main App Component (unchanged for Safari compatibility)
+        const App = () => {
+            const {
+                notes,
+                isLoading,
+                error,
+                addNote,
+                updateNote,
+                deleteNote,
+                exportNotes: exportNotesDB,
+                importNotes,
+                usingFallback
+            } = useIndexedDB();
+
+            const [searchTerm, setSearchTerm] = useState('');
+            const [searchType, setSearchType] = useState('subject');
+            const [showForm, setShowForm] = useState(false);
+            const [editingNote, setEditingNote] = useState(null);
+            const [importResult, setImportResult] = useState(null);
+            const [showSyncConfig, setShowSyncConfig] = useState(false);
+
+            // Safari-compatible keyboard shortcuts
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    // Use metaKey for Safari/Mac, ctrlKey for others
+                    const modifierKey = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? e.metaKey : e.ctrlKey;
+                    
+                    if (modifierKey && e.key === 'n') {
+                        e.preventDefault();
+                        setShowForm(true);
+                    }
+                    if (modifierKey && e.key === 'e') {
+                        e.preventDefault();
+                        exportNotesDB();
+                    }
+                    if (modifierKey && e.key === 'i') {
+                        e.preventDefault();
+                        handleImportClick();
+                    }
+                    if (e.key === 'Escape' && (showForm || showSyncConfig)) {
+                        setShowForm(false);
+                        setShowSyncConfig(false);
+                    }
+                };
+
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, [showForm, showSyncConfig, exportNotesDB]);
+
+            // Filter notes
+            const filteredNotes = notes.filter(note => {
+                if (!searchTerm.trim()) return true;
+                
+                if (searchType === 'subject') {
+                    return note.subject.toLowerCase().includes(searchTerm.toLowerCase());
+                } else if (searchType === 'date') {
+                    const noteDate = new Date(note.createdAt).toLocaleDateString('pt-BR');
+                    return noteDate.includes(searchTerm);
+                } else if (searchType === 'content') {
+                    return note.content.toLowerCase().includes(searchTerm.toLowerCase());
+                }
+                
+                return true;
+            });
+
+            // Handlers
+            const handleAddNote = () => {
+                setEditingNote(null);
+                setShowForm(true);
+            };
+
+            const handleEditNote = (note) => {
+                setEditingNote(note);
+                setShowForm(true);
+            };
+
+            const handleSaveNote = async (noteData) => {
+                try {
+                    if (editingNote) {
+                        await updateNote(editingNote.id, noteData);
+                    } else {
+                        await addNote(noteData);
+                    }
+                    setShowForm(false);
+                    setEditingNote(null);
+                } catch (error) {
+                    console.error('Erro ao salvar anotação:', error);
+                }
+            };
+
+            const handleDeleteNote = async (id) => {
+                if (window.confirm('Tem certeza que deseja excluir esta anotação?')) {
+                    try {
+                        await deleteNote(id);
+                    } catch (error) {
+                        console.error('Erro ao excluir anotação:', error);
+                    }
+                }
+            };
+
+            const handleCancelForm = () => {
+                setShowForm(false);
+                setEditingNote(null);
+            };
+
+            const handleImportClick = () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        handleImportNotes(file);
+                    }
+                };
+                input.click();
+            };
+
+            const handleImportNotes = async (file) => {
+                try {
+                    const result = await importNotes(file);
+                    setImportResult({
+                        type: 'success',
+                        message: `Importação concluída! ${result.imported} novas anotações, ${result.updated} atualizadas, ${result.skipped} ignoradas.`
+                    });
+                    
+                    setTimeout(() => setImportResult(null), 5000);
+                } catch (error) {
+                    setImportResult({
+                        type: 'error', 
+                        message: `Erro na importação: ${error.message}`
+                    });
+                    
+                    setTimeout(() => setImportResult(null), 5000);
+                }
+            };
+
+            if (isLoading) {
+                return (
+                    <div className="app">
+                        <Header 
+                            onAddNote={() => {}}
+                            totalNotes={0}
+                            onExportNotes={() => {}}
+                            onImportNotes={() => {}}
+                            onSyncConfig={() => {}}
+                        />
+                        <main className="main-content">
+                            <div className="empty-state">
+                                <h3>⏳ Carregando anotações...</h3>
+                                <p>Aguarde um momento...</p>
+                            </div>
+                        </main>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="app">
+                    <Header 
+                        onAddNote={handleAddNote}
+                        totalNotes={notes.length}
+                        onExportNotes={exportNotesDB}
+                        onImportNotes={handleImportNotes}
+                        onSyncConfig={() => setShowSyncConfig(true)}
+                    />
+                    
+                    <main className="main-content">
+                        <SearchBar 
+                            searchTerm={searchTerm}
+                            onSearchChange={setSearchTerm}
+                            searchType={searchType}
+                            onSearchTypeChange={setSearchType}
+                        />
+
+                        {error && (
+                            <div className="import-message import-error">
+                                ⚠️ {error}
+                            </div>
+                        )}
+                        
+                        {usingFallback && (
+                            <div className="import-message" style={{background: 'linear-gradient(135deg, #ff8c00 0%, #ffa500 100%)', color: '#fff', border: '1px solid #ff8c00'}}>
+                                🍎 Safari: Usando armazenamento limitado. Funcionalidade reduzida mas segura.
+                            </div>
+                        )}
+
+                        {importResult && (
+                            <div className={`import-message ${importResult.type === 'success' ? 'import-success' : 'import-error'}`}>
+                                {importResult.type === 'success' ? '✅' : '❌'} {importResult.message}
+                            </div>
+                        )}
+
+                        <div className="notes-container">
+                            {filteredNotes.length === 0 ? (
+                                <div className="empty-state">
+                                    {searchTerm ? (
+                                        <div>
+                                            <h3>🔍 Nenhuma anotação encontrada</h3>
+                                            <p>Tente ajustar sua busca ou criar uma nova anotação.</p>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <h3>📝 Nenhuma anotação ainda</h3>
+                                            <p>Clique em "Nova" para criar sua primeira anotação!</p>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="notes-grid">
+                                    {filteredNotes.map(note => (
+                                        <NoteItem
+                                            key={note.id}
+                                            note={note}
+                                            onEdit={handleEditNote}
+                                            onDelete={handleDeleteNote}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </main>
+
+                    {showForm && (
+                        <NoteForm
+                            note={editingNote}
+                            onSave={handleSaveNote}
+                            onCancel={handleCancelForm}
+                            isEditing={!!editingNote}
+                        />
+                    )}
+
+                    {showSyncConfig && (
+                        <SyncConfigModal
+                            isOpen={showSyncConfig}
+                            onClose={() => setShowSyncConfig(false)}
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        // Safari-compatible render
+        const root = ReactDOM.createRoot ? 
+            ReactDOM.createRoot(document.getElementById('root')) :
+            ReactDOM.render(<App />, document.getElementById('root'));
+            
+        if (ReactDOM.createRoot) {
+            root.render(<App />);
+        }
+    </script>
+</body>
+</html>

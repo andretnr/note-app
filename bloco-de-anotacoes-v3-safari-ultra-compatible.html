@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 Bloco de Anotações - Safari Ultra Compatible v3.1</title>
+    
+    <!-- React e Babel via CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        /* Reset e Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e8eaed;
+            line-height: 1.6;
+            min-height: 100vh;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        /* App Container */
+        .app {
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(15, 15, 35, 0.95);
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid #533483;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 0 1rem;
+        }
+
+        .app-title {
+            font-size: 2.5rem;
+            color: #e8eaed;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(138, 43, 226, 0.3);
+        }
+
+        .header-stats {
+            font-size: 0.9rem;
+            color: #b8bcc8;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid #533483;
+            box-shadow: 0 2px 10px rgba(83, 52, 131, 0.3);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 0.9rem;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8a2be2 0%, #6a5acd 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(138, 43, 226, 0.6);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #2c2c54 0%, #40407a 100%);
+            color: #e8eaed;
+            border: 1px solid #533483;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #40407a 0%, #2c2c54 100%);
+            border-color: #8a2be2;
+            transform: translateY(-1px);
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            min-width: auto;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            width: 100%;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            flex: 1;
+            min-width: 300px;
+            margin-bottom: 3rem;
+        }
+
+        .search-input-group {
+            display: flex;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            padding: 0.5rem;
+            box-shadow: 0 4px 15px rgba(83, 52, 131, 0.3);
+            border: 1px solid #533483;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 0.75rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            background: rgba(15, 15, 35, 0.8);
+            color: #e8eaed;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .search-input::placeholder {
+            color: #b8bcc8;
+        }
+
+        .search-select {
+            border: none;
+            outline: none;
+            padding: 0.75rem;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            background: #2c2c54;
+            color: #e8eaed;
+            cursor: pointer;
+            min-width: 120px;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        /* Notes */
+        .notes-container {
+            min-height: 400px;
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .note-item {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 16px rgba(83, 52, 131, 0.3);
+            transition: all 0.3s ease;
+            border: 1px solid #533483;
+        }
+
+        .note-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.4);
+            border-color: #8a2be2;
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .note-subject {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e8eaed;
+            line-height: 1.4;
+            flex: 1;
+            word-wrap: break-word;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .note-btn {
+            padding: 0.25rem 0.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .edit-btn {
+            background: #7b68ee;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #6a5acd;
+        }
+
+        .delete-btn {
+            background: #dc143c;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #b22222;
+        }
+
+        .note-content {
+            color: #c9ccd1;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .note-footer {
+            border-top: 1px solid #533483;
+            padding-top: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .note-category {
+            background: linear-gradient(135deg, #8a2be2 0%, #6a5acd 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .note-date {
+            color: #b8bcc8;
+            font-size: 0.8rem;
+        }
+
+        /* Modal Styles */
+        .note-form-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .note-form {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(138, 43, 226, 0.3);
+            border: 1px solid #533483;
+        }
+
+        .note-form h3 {
+            color: #e8eaed;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #e8eaed;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #533483;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: border-color 0.2s ease;
+            background: #0f0f23;
+            color: #e8eaed;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #8a2be2;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        /* Messages */
+        .import-message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .import-success {
+            background: linear-gradient(135deg, #228b22 0%, #32cd32 100%);
+            color: #f0fff0;
+            border: 1px solid #32cd32;
+        }
+
+        .import-error {
+            background: linear-gradient(135deg, #8b0000 0%, #dc143c 100%);
+            color: #ffe4e1;
+            border: 1px solid #dc143c;
+        }
+
+        .debug-info {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border: 1px solid #3b82f6;
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #b8bcc8;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #c9ccd1;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .notes-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .search-bar {
+                min-width: auto;
+            }
+        }
+
+        /* Safari iOS specific */
+        @supports (-webkit-touch-callout: none) {
+            .search-input, .form-group input, .form-group textarea {
+                font-size: 16px;
+            }
+            
+            .btn {
+                -webkit-tap-highlight-color: transparent;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback, useRef } = React;
+
+        // Sistema de armazenamento robusto com fallback
+        class StorageManager {
+            constructor() {
+                this.storeName = 'notes';
+                this.fallbackKey = 'safari-notes-fallback';
+                this.debugMode = true;
+                this.preferIndexedDB = true;
+                this.isReady = false;
+                this.storage = null;
+                
+                // Detecção de navegador
+                this.isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+                this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                
+                this.debug(`🔧 StorageManager iniciado - Safari: ${this.isSafari}, iOS: ${this.isIOS}`);
+            }
+
+            debug(message) {
+                if (this.debugMode) {
+                    console.log(`[StorageManager] ${message}`);
+                }
+            }
+
+            async init() {
+                this.debug('Inicializando sistema de armazenamento...');
+
+                // Tentar IndexedDB primeiro
+                if (this.preferIndexedDB && window.indexedDB) {
+                    try {
+                        await this.initIndexedDB();
+                        this.storage = 'indexeddb';
+                        this.debug('✅ IndexedDB inicializado com sucesso');
+                        return;
+                    } catch (error) {
+                        this.debug(`❌ IndexedDB falhou: ${error.message}`);
+                    }
+                }
+
+                // Fallback para localStorage
+                if (this.initLocalStorage()) {
+                    this.storage = 'localstorage';
+                    this.debug('✅ localStorage fallback ativo');
+                } else {
+                    throw new Error('Nenhum sistema de armazenamento disponível');
+                }
+            }
+
+            async initIndexedDB() {
+                return new Promise((resolve, reject) => {
+                    const timeoutId = setTimeout(() => {
+                        reject(new Error('Timeout ao abrir IndexedDB'));
+                    }, this.isSafari ? 8000 : 5000);
+
+                    const request = indexedDB.open('NotesAppDB', 1);
+
+                    request.onerror = () => {
+                        clearTimeout(timeoutId);
+                        reject(new Error(`IndexedDB error: ${request.error?.message || 'Desconhecido'}`));
+                    };
+
+                    request.onsuccess = () => {
+                        clearTimeout(timeoutId);
+                        this.db = request.result;
+                        this.isReady = true;
+                        resolve();
+                    };
+
+                    request.onupgradeneeded = (event) => {
+                        try {
+                            const db = event.target.result;
+                            if (!db.objectStoreNames.contains(this.storeName)) {
+                                const store = db.createObjectStore(this.storeName, { keyPath: 'id' });
+                                store.createIndex('subject', 'subject', { unique: false });
+                                store.createIndex('category', 'category', { unique: false });
+                                store.createIndex('createdAt', 'createdAt', { unique: false });
+                            }
+                        } catch (error) {
+                            clearTimeout(timeoutId);
+                            reject(error);
+                        }
+                    };
+
+                    request.onblocked = () => {
+                        this.debug('⚠️ IndexedDB bloqueado - feche outras abas');
+                    };
+                });
+            }
+
+            initLocalStorage() {
+                try {
+                    // Teste simples do localStorage
+                    const testKey = 'test-safari-storage';
+                    localStorage.setItem(testKey, 'test');
+                    localStorage.removeItem(testKey);
+                    this.isReady = true;
+                    return true;
+                } catch (error) {
+                    this.debug(`❌ localStorage falhou: ${error.message}`);
+                    return false;
+                }
+            }
+
+            async getAllNotes() {
+                if (this.storage === 'indexeddb') {
+                    return this.getAllNotesFromIndexedDB();
+                } else {
+                    return this.getAllNotesFromLocalStorage();
+                }
+            }
+
+            async getAllNotesFromIndexedDB() {
+                return new Promise((resolve, reject) => {
+                    try {
+                        const transaction = this.db.transaction([this.storeName], 'readonly');
+                        const store = transaction.objectStore(this.storeName);
+                        const request = store.getAll();
+
+                        const timeoutId = setTimeout(() => {
+                            reject(new Error('Timeout ao buscar anotações'));
+                        }, this.isSafari ? 8000 : 5000);
+
+                        request.onsuccess = () => {
+                            clearTimeout(timeoutId);
+                            const notes = request.result || [];
+                            notes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                            resolve(notes);
+                        };
+
+                        request.onerror = () => {
+                            clearTimeout(timeoutId);
+                            reject(new Error(`Erro ao buscar: ${request.error?.message || 'Desconhecido'}`));
+                        };
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            }
+
+            getAllNotesFromLocalStorage() {
+                try {
+                    const stored = localStorage.getItem(this.fallbackKey);
+                    if (stored) {
+                        const notes = JSON.parse(stored);
+                        return Array.isArray(notes) ? notes : [];
+                    }
+                    return [];
+                } catch (error) {
+                    this.debug(`Erro ao carregar localStorage: ${error.message}`);
+                    return [];
+                }
+            }
+
+            async saveNote(note) {
+                if (this.storage === 'indexeddb') {
+                    return this.saveNoteToIndexedDB(note);
+                } else {
+                    return this.saveNoteToLocalStorage(note);
+                }
+            }
+
+            async saveNoteToIndexedDB(note) {
+                return new Promise((resolve, reject) => {
+                    try {
+                        const transaction = this.db.transaction([this.storeName], 'readwrite');
+                        const store = transaction.objectStore(this.storeName);
+                        const request = store.put(note);
+
+                        const timeoutId = setTimeout(() => {
+                            reject(new Error('Timeout ao salvar anotação'));
+                        }, this.isSafari ? 8000 : 5000);
+
+                        request.onsuccess = () => {
+                            clearTimeout(timeoutId);
+                            resolve(note);
+                        };
+
+                        request.onerror = () => {
+                            clearTimeout(timeoutId);
+                            reject(new Error(`Erro ao salvar: ${request.error?.message || 'Desconhecido'}`));
+                        };
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            }
+
+            async saveNoteToLocalStorage(note) {
+                try {
+                    const notes = await this.getAllNotes();
+                    const existingIndex = notes.findIndex(n => n.id === note.id);
+                    
+                    if (existingIndex >= 0) {
+                        notes[existingIndex] = note;
+                    } else {
+                        notes.unshift(note);
+                    }
+                    
+                    localStorage.setItem(this.fallbackKey, JSON.stringify(notes));
+                    return note;
+                } catch (error) {
+                    throw new Error(`Erro localStorage: ${error.message}`);
+                }
+            }
+
+            async deleteNote(id) {
+                if (this.storage === 'indexeddb') {
+                    return this.deleteNoteFromIndexedDB(id);
+                } else {
+                    return this.deleteNoteFromLocalStorage(id);
+                }
+            }
+
+            async deleteNoteFromIndexedDB(id) {
+                return new Promise((resolve, reject) => {
+                    try {
+                        const transaction = this.db.transaction([this.storeName], 'readwrite');
+                        const store = transaction.objectStore(this.storeName);
+                        const request = store.delete(id);
+
+                        const timeoutId = setTimeout(() => {
+                            reject(new Error('Timeout ao deletar anotação'));
+                        }, this.isSafari ? 8000 : 5000);
+
+                        request.onsuccess = () => {
+                            clearTimeout(timeoutId);
+                            resolve(true);
+                        };
+
+                        request.onerror = () => {
+                            clearTimeout(timeoutId);
+                            reject(new Error(`Erro ao deletar: ${request.error?.message || 'Desconhecido'}`));
+                        };
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            }
+
+            async deleteNoteFromLocalStorage(id) {
+                try {
+                    const notes = await this.getAllNotes();
+                    const filtered = notes.filter(note => note.id !== id);
+                    localStorage.setItem(this.fallbackKey, JSON.stringify(filtered));
+                    return true;
+                } catch (error) {
+                    throw new Error(`Erro localStorage: ${error.message}`);
+                }
+            }
+
+            getStatus() {
+                return {
+                    storage: this.storage,
+                    ready: this.isReady,
+                    safari: this.isSafari,
+                    ios: this.isIOS,
+                    fallback: this.storage === 'localstorage'
+                };
+            }
+        }
+
+        // Hook personalizado
+        const useNotesStorage = () => {
+            const [notes, setNotes] = useState([]);
+            const [isLoading, setIsLoading] = useState(true);
+            const [error, setError] = useState(null);
+            const [status, setStatus] = useState(null);
+            const storageRef = useRef(null);
+
+            useEffect(() => {
+                const initStorage = async () => {
+                    try {
+                        storageRef.current = new StorageManager();
+                        await storageRef.current.init();
+                        
+                        const allNotes = await storageRef.current.getAllNotes();
+                        setNotes(allNotes);
+                        setStatus(storageRef.current.getStatus());
+                        setIsLoading(false);
+                        
+                        console.log(`📋 Carregadas ${allNotes.length} anotações`);
+                    } catch (err) {
+                        console.error('❌ Erro na inicialização:', err);
+                        setError(err.message);
+                        setIsLoading(false);
+                    }
+                };
+
+                initStorage();
+            }, []);
+
+            const addNote = useCallback(async (noteData) => {
+                try {
+                    const newNote = {
+                        ...noteData,
+                        id: Date.now() + Math.random(),
+                        createdAt: new Date().toISOString(),
+                        lastModified: new Date().toISOString()
+                    };
+
+                    const savedNote = await storageRef.current.saveNote(newNote);
+                    setNotes(prev => [savedNote, ...prev]);
+                    return savedNote;
+                } catch (err) {
+                    console.error('Erro ao adicionar:', err);
+                    setError(err.message);
+                    throw err;
+                }
+            }, []);
+
+            const updateNote = useCallback(async (id, updates) => {
+                try {
+                    const existingNote = notes.find(note => note.id === id);
+                    if (!existingNote) {
+                        throw new Error('Anotação não encontrada');
+                    }
+
+                    const updatedNote = {
+                        ...existingNote,
+                        ...updates,
+                        id: existingNote.id,
+                        updatedAt: new Date().toISOString(),
+                        lastModified: new Date().toISOString()
+                    };
+
+                    const savedNote = await storageRef.current.saveNote(updatedNote);
+                    setNotes(prev => prev.map(note => note.id === id ? savedNote : note));
+                    return savedNote;
+                } catch (err) {
+                    console.error('Erro ao atualizar:', err);
+                    setError(err.message);
+                    throw err;
+                }
+            }, [notes]);
+
+            const deleteNote = useCallback(async (id) => {
+                try {
+                    await storageRef.current.deleteNote(id);
+                    setNotes(prev => prev.filter(note => note.id !== id));
+                    return true;
+                } catch (err) {
+                    console.error('Erro ao deletar:', err);
+                    setError(err.message);
+                    throw err;
+                }
+            }, []);
+
+            const exportNotes = useCallback(async () => {
+                try {
+                    const exportData = {
+                        notes,
+                        timestamp: new Date().toISOString(),
+                        version: '3.1-ultra-compatible',
+                        source: 'standalone-ultra',
+                        totalNotes: notes.length,
+                        storage: status?.storage || 'unknown'
+                    };
+                    
+                    const dataStr = JSON.stringify(exportData, null, 2);
+                    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+                    const fileName = `anotacoes_backup_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`;
+                    
+                    const link = document.createElement('a');
+                    link.setAttribute('href', dataUri);
+                    link.setAttribute('download', fileName);
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    return exportData;
+                } catch (err) {
+                    console.error('Erro ao exportar:', err);
+                    throw err;
+                }
+            }, [notes, status]);
+
+            const importNotes = useCallback(async (file) => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = async (e) => {
+                        try {
+                            const importData = JSON.parse(e.target.result);
+                            
+                            if (!importData.notes || !Array.isArray(importData.notes)) {
+                                throw new Error('Arquivo inválido');
+                            }
+
+                            let imported = 0;
+                            let updated = 0;
+                            let skipped = 0;
+
+                            for (const importNote of importData.notes) {
+                                const existing = notes.find(n => n.id === importNote.id);
+                                
+                                if (existing) {
+                                    const existingTime = new Date(existing.lastModified || existing.createdAt);
+                                    const importTime = new Date(importNote.lastModified || importNote.createdAt);
+                                    
+                                    if (importTime > existingTime) {
+                                        await storageRef.current.saveNote(importNote);
+                                        updated++;
+                                    } else {
+                                        skipped++;
+                                    }
+                                } else {
+                                    await storageRef.current.saveNote(importNote);
+                                    imported++;
+                                }
+                            }
+
+                            // Recarregar todas as notas
+                            const allNotes = await storageRef.current.getAllNotes();
+                            setNotes(allNotes);
+                            
+                            resolve({ imported, updated, skipped, total: importData.notes.length });
+                        } catch (error) {
+                            reject(error);
+                        }
+                    };
+                    
+                    reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+                    reader.readAsText(file);
+                });
+            }, [notes]);
+
+            return {
+                notes,
+                isLoading,
+                error,
+                status,
+                addNote,
+                updateNote,
+                deleteNote,
+                exportNotes,
+                importNotes,
+                clearError: () => setError(null),
+                totalNotes: notes.length
+            };
+        };
+
+        // Componentes (simplificados para máxima compatibilidade)
+        const Header = ({ onAddNote, totalNotes, onExportNotes, onImportNotes }) => {
+            const handleImportClick = () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        onImportNotes(file);
+                    }
+                };
+                input.click();
+            };
+
+            return (
+                <header className="header">
+                    <div className="header-content">
+                        <h1 className="app-title">📝 Bloco de Anotações</h1>
+                        <div className="header-stats">
+                            <span>{totalNotes} anotações</span>
+                        </div>
+                        <div className="header-actions">
+                            <button onClick={onAddNote} className="btn btn-primary">
+                                ➕ Nova
+                            </button>
+                            <button onClick={onExportNotes} className="btn btn-secondary">
+                                💾 Exportar
+                            </button>
+                            <button onClick={handleImportClick} className="btn btn-secondary">
+                                📥 Importar
+                            </button>
+                        </div>
+                    </div>
+                </header>
+            );
+        };
+
+        const SearchBar = ({ searchTerm, onSearchChange, searchType, onSearchTypeChange }) => {
+            return (
+                <div className="search-bar">
+                    <div className="search-input-group">
+                        <input
+                            type="text"
+                            placeholder={searchType === 'subject' ? 'Buscar por assunto...' : 
+                                        searchType === 'date' ? 'Buscar por data...' : 
+                                        'Buscar no conteúdo...'}
+                            value={searchTerm}
+                            onChange={(e) => onSearchChange(e.target.value)}
+                            className="search-input"
+                        />
+                        <select
+                            value={searchType}
+                            onChange={(e) => onSearchTypeChange(e.target.value)}
+                            className="search-select"
+                        >
+                            <option value="subject">Assunto</option>
+                            <option value="content">Conteúdo</option>
+                            <option value="date">Data</option>
+                        </select>
+                    </div>
+                </div>
+            );
+        };
+
+        const NoteForm = ({ note, onSave, onCancel, isEditing }) => {
+            const [subject, setSubject] = useState(note?.subject || '');
+            const [content, setContent] = useState(note?.content || '');
+            const [category, setCategory] = useState(note?.category || 'geral');
+
+            useEffect(() => {
+                if (note) {
+                    setSubject(note.subject || '');
+                    setContent(note.content || '');
+                    setCategory(note.category || 'geral');
+                }
+            }, [note]);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                
+                if (subject.trim() && content.trim()) {
+                    onSave({
+                        subject: subject.trim(),
+                        content: content.trim(),
+                        category: category
+                    });
+                    
+                    if (!isEditing) {
+                        setSubject('');
+                        setContent('');
+                        setCategory('geral');
+                    }
+                }
+            };
+
+            return (
+                <div className="note-form-overlay" onClick={(e) => e.target === e.currentTarget && onCancel()}>
+                    <form onSubmit={handleSubmit} className="note-form">
+                        <h3>{isEditing ? 'Editar Anotação' : 'Nova Anotação'}</h3>
+                        
+                        <div className="form-group">
+                            <label>Assunto:</label>
+                            <input
+                                type="text"
+                                value={subject}
+                                onChange={(e) => setSubject(e.target.value)}
+                                placeholder="Digite o assunto"
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Categoria:</label>
+                            <select value={category} onChange={(e) => setCategory(e.target.value)}>
+                                <option value="geral">📋 Geral</option>
+                                <option value="trabalho">💼 Trabalho</option>
+                                <option value="pessoal">👤 Pessoal</option>
+                                <option value="estudo">📚 Estudo</option>
+                                <option value="ideias">💡 Ideias</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group">
+                            <label>Conteúdo:</label>
+                            <textarea
+                                value={content}
+                                onChange={(e) => setContent(e.target.value)}
+                                placeholder="Digite o conteúdo"
+                                required
+                                rows={6}
+                            />
+                        </div>
+
+                        <div className="form-actions">
+                            <button type="button" onClick={onCancel} className="btn btn-secondary">
+                                Cancelar
+                            </button>
+                            <button type="submit" className="btn btn-primary">
+                                {isEditing ? 'Atualizar' : 'Salvar'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            );
+        };
+
+        const NoteItem = ({ note, onEdit, onDelete }) => {
+            const formatDate = (dateString) => {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+            };
+
+            const getCategoryIcon = (category) => {
+                const icons = {
+                    'geral': '📋',
+                    'trabalho': '💼',
+                    'pessoal': '👤',
+                    'estudo': '📚',
+                    'ideias': '💡'
+                };
+                return icons[category] || '📋';
+            };
+
+            return (
+                <div className="note-item">
+                    <div className="note-header">
+                        <div className="note-subject">{note.subject}</div>
+                        <div className="note-actions">
+                            <button onClick={() => onEdit(note)} className="note-btn edit-btn">
+                                ✏️
+                            </button>
+                            <button onClick={() => onDelete(note.id)} className="note-btn delete-btn">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                    <div className="note-content">{note.content}</div>
+                    <div className="note-footer">
+                        <div className="note-category">
+                            {getCategoryIcon(note.category)} {note.category}
+                        </div>
+                        <div className="note-date">
+                            {formatDate(note.createdAt)}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // App principal
+        const App = () => {
+            const {
+                notes,
+                isLoading,
+                error,
+                status,
+                addNote,
+                updateNote,
+                deleteNote,
+                exportNotes,
+                importNotes,
+                clearError
+            } = useNotesStorage();
+
+            const [searchTerm, setSearchTerm] = useState('');
+            const [searchType, setSearchType] = useState('subject');
+            const [showForm, setShowForm] = useState(false);
+            const [editingNote, setEditingNote] = useState(null);
+            const [importResult, setImportResult] = useState(null);
+
+            // Filtrar notas
+            const filteredNotes = notes.filter(note => {
+                if (!searchTerm.trim()) return true;
+                
+                if (searchType === 'subject') {
+                    return note.subject.toLowerCase().includes(searchTerm.toLowerCase());
+                } else if (searchType === 'date') {
+                    const noteDate = new Date(note.createdAt).toLocaleDateString('pt-BR');
+                    return noteDate.includes(searchTerm);
+                } else if (searchType === 'content') {
+                    return note.content.toLowerCase().includes(searchTerm.toLowerCase());
+                }
+                
+                return true;
+            });
+
+            // Handlers
+            const handleAddNote = () => {
+                setEditingNote(null);
+                setShowForm(true);
+            };
+
+            const handleEditNote = (note) => {
+                setEditingNote(note);
+                setShowForm(true);
+            };
+
+            const handleSaveNote = async (noteData) => {
+                try {
+                    if (editingNote) {
+                        await updateNote(editingNote.id, noteData);
+                    } else {
+                        await addNote(noteData);
+                    }
+                    setShowForm(false);
+                    setEditingNote(null);
+                } catch (error) {
+                    console.error('Erro ao salvar:', error);
+                }
+            };
+
+            const handleDeleteNote = async (id) => {
+                if (window.confirm('Excluir esta anotação?')) {
+                    try {
+                        await deleteNote(id);
+                    } catch (error) {
+                        console.error('Erro ao excluir:', error);
+                    }
+                }
+            };
+
+            const handleImportNotes = async (file) => {
+                try {
+                    const result = await importNotes(file);
+                    setImportResult({
+                        type: 'success',
+                        message: `Importação OK! ${result.imported} novas, ${result.updated} atualizadas, ${result.skipped} ignoradas.`
+                    });
+                    setTimeout(() => setImportResult(null), 5000);
+                } catch (error) {
+                    setImportResult({
+                        type: 'error', 
+                        message: `Erro: ${error.message}`
+                    });
+                    setTimeout(() => setImportResult(null), 5000);
+                }
+            };
+
+            if (isLoading) {
+                return (
+                    <div className="app">
+                        <Header onAddNote={() => {}} totalNotes={0} onExportNotes={() => {}} onImportNotes={() => {}} />
+                        <main className="main-content">
+                            <div className="empty-state">
+                                <h3>⏳ Carregando...</h3>
+                                <p>Aguarde um momento...</p>
+                            </div>
+                        </main>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="app">
+                    <Header 
+                        onAddNote={handleAddNote}
+                        totalNotes={notes.length}
+                        onExportNotes={exportNotes}
+                        onImportNotes={handleImportNotes}
+                    />
+                    
+                    <main className="main-content">
+                        <SearchBar 
+                            searchTerm={searchTerm}
+                            onSearchChange={setSearchTerm}
+                            searchType={searchType}
+                            onSearchTypeChange={setSearchType}
+                        />
+
+                        {status && status.fallback && (
+                            <div className="import-message" style={{background: 'linear-gradient(135deg, #ff8c00 0%, #ffa500 100%)', color: '#fff', border: '1px solid #ff8c00'}}>
+                                🍎 Safari: Usando armazenamento local limitado. Funciona, mas com menos capacidade.
+                            </div>
+                        )}
+
+                        {status && status.safari && (
+                            <div className="import-message debug-info">
+                                🔧 Debug: Safari {status.ios ? 'iOS' : 'Desktop'} | Storage: {status.storage} | Ready: {status.ready ? 'Sim' : 'Não'}
+                            </div>
+                        )}
+
+                        {error && (
+                            <div className="import-message import-error">
+                                ⚠️ {error}
+                            </div>
+                        )}
+
+                        {importResult && (
+                            <div className={`import-message ${importResult.type === 'success' ? 'import-success' : 'import-error'}`}>
+                                {importResult.type === 'success' ? '✅' : '❌'} {importResult.message}
+                            </div>
+                        )}
+
+                        <div className="notes-container">
+                            {filteredNotes.length === 0 ? (
+                                <div className="empty-state">
+                                    {searchTerm ? (
+                                        <div>
+                                            <h3>🔍 Nenhuma anotação encontrada</h3>
+                                            <p>Tente ajustar sua busca.</p>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <h3>📝 Nenhuma anotação ainda</h3>
+                                            <p>Clique em "Nova" para começar!</p>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="notes-grid">
+                                    {filteredNotes.map(note => (
+                                        <NoteItem
+                                            key={note.id}
+                                            note={note}
+                                            onEdit={handleEditNote}
+                                            onDelete={handleDeleteNote}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </main>
+
+                    {showForm && (
+                        <NoteForm
+                            note={editingNote}
+                            onSave={handleSaveNote}
+                            onCancel={() => {
+                                setShowForm(false);
+                                setEditingNote(null);
+                            }}
+                            isEditing={!!editingNote}
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        // Renderizar
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
