@@ -1,51 +1,56 @@
 import React, { useState, useEffect } from 'react'
+import './styles/App.css'
+import useIndexedDB from './hooks/useIndexedDB'
+import useLocalSync from './hooks/useLocalSync'
 import Header from './components/Header'
 import SearchBar from './components/SearchBar'
 import NoteForm from './components/NoteForm'
-import NotesList from './components/NotesList'
-import useLocalStorage from './hooks/useLocalStorage'
-import './styles/App.css'
+import NoteItem from './components/NoteItem'
+import SyncManager from './components/SyncManager'
 
 function App() {
-  // Usar hook customizado para localStorage confiável
-  const [notes, setNotes] = useLocalStorage('notes', [])
+  const { 
+    notes, 
+    isLoading, 
+    error,
+    addNote, 
+    updateNote, 
+    deleteNote, 
+    searchNotes,
+    exportNotes: exportNotesDB,
+    importNotes
+  } = useIndexedDB()
+
+  const {
+    isEnabled: syncEnabled,
+    lastSync,
+    conflicts,
+    sync: manualSync,
+    toggleSync,
+    resolveConflict
+  } = useLocalSync(notes, { addNote, updateNote, deleteNote })
+
   const [searchTerm, setSearchTerm] = useState('')
   const [searchType, setSearchType] = useState('subject')
   const [showForm, setShowForm] = useState(false)
-
-  const addNote = (note) => {
-    const newNote = {
-      id: Date.now(),
-      ...note,
-      createdAt: new Date().toISOString()
-    }
-    setNotes(prevNotes => [newNote, ...prevNotes])
-    setShowForm(false)
-  }
-
-  const deleteNote = (id) => {
-    setNotes(prevNotes => prevNotes.filter(note => note.id !== id))
-  }
-
-  const editNote = (id, updatedNote) => {
-    setNotes(prevNotes => 
-      prevNotes.map(note => 
-        note.id === id 
-          ? { ...note, ...updatedNote, updatedAt: new Date().toISOString() }
-          : note
-      )
-    )
-  }
+  const [editingNote, setEditingNote] = useState(null)
+  const [showSyncManager, setShowSyncManager] = useState(false)
 
   // Atalhos de teclado
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Ctrl/Cmd + N para nova anotação
       if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
         e.preventDefault()
         setShowForm(true)
       }
-      // Escape para fechar formulário
+      if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+        e.preventDefault()
+        exportNotesDB()
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault()
+        manualSync()
+      }
       if (e.key === 'Escape' && showForm) {
         setShowForm(false)
       }
@@ -53,83 +58,161 @@ function App() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [showForm])
+  }, [showForm, exportNotesDB, manualSync])
 
-  // Função para exportar anotações
-  const exportNotes = () => {
-    const dataStr = JSON.stringify(notes, null, 2)
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr)
-    
-    const exportFileDefaultName = `anotacoes_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`
-    
-    const linkElement = document.createElement('a')
-    linkElement.setAttribute('href', dataUri)
-    linkElement.setAttribute('download', exportFileDefaultName)
-    linkElement.click()
-  }
-
+  // Filtrar anotações localmente
   const filteredNotes = notes.filter(note => {
-    if (!searchTerm) return true
+    if (!searchTerm.trim()) return true
     
     if (searchType === 'subject') {
       return note.subject.toLowerCase().includes(searchTerm.toLowerCase())
     } else if (searchType === 'date') {
       const noteDate = new Date(note.createdAt).toLocaleDateString('pt-BR')
       return noteDate.includes(searchTerm)
+    } else if (searchType === 'content') {
+      return note.content.toLowerCase().includes(searchTerm.toLowerCase())
     }
     
     return true
   })
 
+  // Mostrar loading se ainda carregando dados
+  if (isLoading) {
+    return (
+      <div className="app">
+        <Header 
+          onAddNote={() => {}}
+          totalNotes={0}
+          onExportNotes={() => {}}
+          onToggleSync={() => {}}
+        />
+        <main className="main-content">
+          <div className="loading-state">
+            <div className="loader"></div>
+            <p>Carregando anotações...</p>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  // Handlers
+  const handleAddNote = () => {
+    setEditingNote(null)
+    setShowForm(true)
+  }
+
+  const handleEditNote = (note) => {
+    setEditingNote(note)
+    setShowForm(true)
+  }
+
+  const handleSaveNote = async (noteData) => {
+    try {
+      if (editingNote) {
+        await updateNote(editingNote.id, noteData)
+      } else {
+        await addNote(noteData)
+      }
+      setShowForm(false)
+      setEditingNote(null)
+    } catch (error) {
+      console.error('Erro ao salvar anotação:', error)
+    }
+  }
+
+  const handleDeleteNote = async (id) => {
+    if (window.confirm('Tem certeza que deseja excluir esta anotação?')) {
+      try {
+        await deleteNote(id)
+      } catch (error) {
+        console.error('Erro ao excluir anotação:', error)
+      }
+    }
+  }
+
+  const handleCancelForm = () => {
+    setShowForm(false)
+    setEditingNote(null)
+  }
+
+  const handleToggleSync = () => {
+    setShowSyncManager(!showSyncManager)
+  }
+
   return (
     <div className="app">
-      <Header />
+      <Header 
+        onAddNote={handleAddNote}
+        totalNotes={notes.length}
+        onExportNotes={exportNotesDB}
+        onToggleSync={handleToggleSync}
+      />
+      
       <main className="main-content">
-        <div className="controls">
-          <SearchBar 
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            searchType={searchType}
-            setSearchType={setSearchType}
-          />
-          <div className="actions-group">
-            <div className="stats">
-              <span className="stats-item">📝 {notes.length} anotações</span>
-              {searchTerm && (
-                <span className="stats-item">🔍 {filteredNotes.length} encontradas</span>
-              )}
-            </div>
-            <button 
-              className="export-btn"
-              onClick={() => exportNotes()}
-              title="Exportar anotações"
-              disabled={notes.length === 0}
-            >
-              📤 Exportar
-            </button>
-            <button 
-              className="add-note-btn"
-              onClick={() => setShowForm(!showForm)}
-              title="Nova anotação (Ctrl+N)"
-            >
-              {showForm ? '❌ Cancelar' : '+ Nova Anotação'}
-            </button>
-          </div>
-        </div>
+        <SearchBar 
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchType={searchType}
+          onSearchTypeChange={setSearchType}
+        />
 
-        {showForm && (
-          <NoteForm 
-            onSubmit={addNote} 
-            onCancel={() => setShowForm(false)}
+        {error && (
+          <div className="error-message">
+            ⚠️ {error}
+          </div>
+        )}
+
+        {showSyncManager && (
+          <SyncManager 
+            isEnabled={syncEnabled}
+            lastSync={lastSync}
+            conflicts={conflicts}
+            onToggleSync={toggleSync}
+            onManualSync={manualSync}
+            onResolveConflict={resolveConflict}
+            onClose={() => setShowSyncManager(false)}
           />
         )}
 
-        <NotesList 
-          notes={filteredNotes}
-          onDelete={deleteNote}
-          onEdit={editNote}
-        />
+        <div className="notes-container">
+          {filteredNotes.length === 0 ? (
+            <div className="empty-state">
+              {searchTerm ? (
+                <div>
+                  <h3>🔍 Nenhuma anotação encontrada</h3>
+                  <p>Tente ajustar sua busca ou criar uma nova anotação.</p>
+                </div>
+              ) : (
+                <div>
+                  <h3>📝 Nenhuma anotação ainda</h3>
+                  <p>Clique em "Nova" para criar sua primeira anotação!</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="notes-grid">
+              {filteredNotes.map(note => (
+                <NoteItem
+                  key={note.id}
+                  note={note}
+                  onEdit={handleEditNote}
+                  onDelete={handleDeleteNote}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </main>
+
+      {showForm && (
+        <NoteForm
+          note={editingNote}
+          onSave={handleSaveNote}
+          onCancel={handleCancelForm}
+          isEditing={!!editingNote}
+        />
+      )}
     </div>
   )
 }

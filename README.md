@@ -1,29 +1,30 @@
-# 📝 Bloco de Anotações
+# 📝 Bloco de Anotações com IndexedDB
 
-Um aplicativo React simples e elegante para organizar suas anotações, com busca por data ou assunto.
+Sistema avançado de anotações com persistência local usando IndexedDB e sincronização entre navegadores.
 
 ## ✨ Recursos Completos
 
 ### 🎯 Funcionalidades Principais
-- **✅ Interface Simplista**: Design clean e moderno com foco na usabilidade
-- **✅ Cards Interativos**: Cada anotação em card individual com hover effects
-- **✅ Edição In-Line**: Edite anotações diretamente nos cards
-- **✅ 8 Categorias**: Organize por contexto com ícones visuais
-- **✅ Busca Inteligente**: Por assunto ou data com filtros em tempo real
-- **✅ Exportação**: Baixe seus dados em formato JSON
-- **✅ Atalhos de Teclado**: Produtividade com Ctrl+N e Escape
-- **✅ Estatísticas**: Contadores em tempo real de anotações
-- **✅ Persistência Local**: Dados salvos automaticamente no navegador
-- **✅ Responsivo**: Funciona perfeitamente em desktop, tablet e mobile
+- **✅ Interface Avançada**: Design moderno com foco na usabilidade e performance
+- **✅ IndexedDB**: Armazenamento ilimitado e muito mais rápido que localStorage
+- **✅ Sincronização Local**: Entre diferentes navegadores no mesmo dispositivo
+- **✅ Busca Otimizada**: Índices no banco para busca instantânea
+- **✅ Exportação/Importação**: Backup completo em JSON com versionamento
+- **✅ Resolução de Conflitos**: Sistema inteligente para gerenciar conflitos de dados
+- **✅ Atalhos de Teclado**: Ctrl+N, Ctrl+E, Ctrl+S e Escape
+- **✅ Performance**: Suporta milhares de anotações sem degradação
+- **✅ Offline First**: Funciona completamente offline após carregamento
+- **✅ Cross-Browser**: Dados compartilhados entre Chrome, Firefox, Safari, Edge
 
-### 📊 Estatísticas do App
-- **Componentes React**: 6 componentes modulares
-- **Linhas de CSS**: +800 linhas de estilos responsivos  
-- **Categorias**: 8 categorias pré-definidas com ícones
-- **Persistência**: LocalStorage com tratamento de erros
-- **Atalhos**: 2 atalhos de teclado para produtividade
-- **Responsivo**: Breakpoints para mobile, tablet e desktop
-- **Animações**: Efeitos suaves de hover e transição
+### 📊 Estatísticas da Versão 2.0
+- **Componentes React**: 8 componentes modulares (+ SyncManager)
+- **Hooks Customizados**: useIndexedDB + useLocalSync para máxima performance
+- **Linhas de CSS**: +1200 linhas com animações e responsividade total
+- **Persistência**: IndexedDB com capacidade ilimitada
+- **Atalhos**: 3 atalhos de teclado (Nova, Exportar, Sync Manual)
+- **Arquitetura**: Sistema de banco com índices e transações
+- **Compatibilidade**: Todos os navegadores modernos
+- **Performance**: Otimizado para milhares de registros
 
 ## 🚀 Opções de Execução
 

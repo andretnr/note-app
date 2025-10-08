@@ -1,1032 +1,2072 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📝 Bloco de Anotações</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <style>
-        /* Reset CSS básico */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<!DOCTYPE html><!DOCTYPE html>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
+<html lang="pt-BR"><html lang="pt-BR">
 
-        #root {
-            width: 100%;
-            min-height: 100vh;
-        }
+<head><head>
 
-        /* Estilos principais da aplicação */
-        .app {
-            min-height: 100vh;
-            display: flex;
+    <meta charset="UTF-8">    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>📝 Bloco de Anotações - IndexedDB</title>    <title>📝 Bloco de Anotações</title>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>    <style>
+
+        /* Reset e Base */        /* Reset CSS básico */
+
+        * {        * {
+
+            margin: 0;            margin: 0;
+
+            padding: 0;            padding: 0;
+
+            box-sizing: border-box;            box-sizing: border-box;
+
+        }        }
+
+
+
+        body {        body {
+
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+            min-height: 100vh;            min-height: 100vh;
+
+            color: #333;            color: #333;
+
+        }        }
+
+
+
+        /* App Container */        #root {
+
+        .app {            width: 100%;
+
+            min-height: 100vh;            min-height: 100vh;
+
+            display: flex;        }
+
             flex-direction: column;
-        }
 
-        /* Header */
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 2rem 0;
-            text-align: center;
+        }        /* Estilos principais da aplicação */
+
+        .app {
+
+        /* Header */            min-height: 100vh;
+
+        .header {            display: flex;
+
+            background: rgba(255, 255, 255, 0.95);            flex-direction: column;
+
+            backdrop-filter: blur(10px);        }
+
             box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-        }
 
-        .header-content {
-            max-width: 800px;
+            padding: 1rem;        /* Header */
+
+            position: sticky;        .header {
+
+            top: 0;            background: rgba(255, 255, 255, 0.95);
+
+            z-index: 100;            backdrop-filter: blur(10px);
+
+        }            padding: 2rem 0;
+
+            text-align: center;
+
+        .header-content {            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+
+            max-width: 1200px;        }
+
             margin: 0 auto;
-            padding: 0 1rem;
+
+            display: flex;        .header-content {
+
+            justify-content: space-between;            max-width: 800px;
+
+            align-items: center;            margin: 0 auto;
+
+            flex-wrap: wrap;            padding: 0 1rem;
+
+            gap: 1rem;        }
+
         }
 
         .app-title {
-            font-size: 2.5rem;
-            color: #4a5568;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
 
-        .app-subtitle {
-            font-size: 1.1rem;
-            color: #718096;
-            font-weight: 400;
-        }
+        .app-title {            font-size: 2.5rem;
 
-        /* Main content */
-        .main-content {
-            flex: 1;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem 1rem;
-            width: 100%;
-        }
+            font-size: 1.5rem;            color: #4a5568;
 
-        /* Controls */
-        .controls {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: space-between;
-        }
+            font-weight: 600;            margin-bottom: 0.5rem;
 
-        .actions-group {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
+            color: #4a5568;            font-weight: 700;
 
-        .stats {
-            display: flex;
-            gap: 1rem;
-            font-size: 0.9rem;
-            color: #718096;
-        }
+        }        }
 
-        .stats-item {
-            background: rgba(255, 255, 255, 0.8);
-            padding: 0.5rem 1rem;
+
+
+        .header-stats {        .app-subtitle {
+
+            font-size: 0.9rem;            font-size: 1.1rem;
+
+            color: #718096;            color: #718096;
+
+            background: #f7fafc;            font-weight: 400;
+
+            padding: 0.5rem 1rem;        }
+
             border-radius: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
 
-        .search-bar {
-            flex: 1;
-            min-width: 300px;
-        }
+        }        /* Main content */
 
-        .search-input-group {
-            display: flex;
+        .main-content {
+
+        .header-actions {            flex: 1;
+
+            display: flex;            max-width: 800px;
+
+            gap: 0.5rem;            margin: 0 auto;
+
+        }            padding: 2rem 1rem;
+
+            width: 100%;
+
+        /* Buttons */        }
+
+        .btn {
+
+            padding: 0.5rem 1rem;        /* Controls */
+
+            border: none;        .controls {
+
+            border-radius: 8px;            display: flex;
+
+            cursor: pointer;            gap: 1rem;
+
+            font-size: 0.9rem;            margin-bottom: 2rem;
+
+            font-weight: 500;            align-items: center;
+
+            transition: all 0.2s;            flex-wrap: wrap;
+
+            display: flex;            justify-content: space-between;
+
+            align-items: center;        }
+
             gap: 0.5rem;
-            background: white;
-            border-radius: 12px;
-            padding: 0.5rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
 
-        .search-input {
-            flex: 1;
-            border: none;
-            outline: none;
+        }        .actions-group {
+
+            display: flex;
+
+        .btn-primary {            gap: 1rem;
+
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);            align-items: center;
+
+            color: white;            flex-wrap: wrap;
+
+        }        }
+
+
+
+        .btn-secondary {        .stats {
+
+            background: #e2e8f0;            display: flex;
+
+            color: #4a5568;            gap: 1rem;
+
+        }            font-size: 0.9rem;
+
+            color: #718096;
+
+        .btn-small {        }
+
+            padding: 0.25rem 0.5rem;
+
+            font-size: 0.8rem;        .stats-item {
+
+        }            background: rgba(255, 255, 255, 0.8);
+
+            padding: 0.5rem 1rem;
+
+        .btn-danger {            border-radius: 20px;
+
+            background: #fed7d7;            backdrop-filter: blur(10px);
+
+            color: #c53030;            border: 1px solid rgba(255, 255, 255, 0.3);
+
+        }        }
+
+
+
+        .btn:hover {        .search-bar {
+
+            transform: translateY(-1px);            flex: 1;
+
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);            min-width: 300px;
+
+        }        }
+
+
+
+        /* Main Content */        .search-input-group {
+
+        .main-content {            display: flex;
+
+            flex: 1;            gap: 0.5rem;
+
+            max-width: 1200px;            background: white;
+
+            margin: 0 auto;            border-radius: 12px;
+
+            padding: 2rem;            padding: 0.5rem;
+
+            width: 100%;            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+
+        }        }
+
+
+
+        /* Search Bar */        .search-input {
+
+        .search-bar {            flex: 1;
+
+            margin-bottom: 2rem;            border: none;
+
+        }            outline: none;
+
             padding: 0.75rem;
-            font-size: 1rem;
-            border-radius: 8px;
-            background: transparent;
+
+        .search-input-group {            font-size: 1rem;
+
+            display: flex;            border-radius: 8px;
+
+            gap: 0.5rem;            background: transparent;
+
+            max-width: 500px;        }
+
         }
 
         .search-input::placeholder {
-            color: #a0aec0;
-        }
 
-        .search-select {
-            border: none;
-            outline: none;
-            padding: 0.75rem;
-            font-size: 0.9rem;
+        .search-type-select {            color: #a0aec0;
+
+            padding: 0.75rem;        }
+
+            border: 2px solid #e2e8f0;
+
+            border-radius: 8px;        .search-select {
+
+            background: white;            border: none;
+
+            font-size: 0.9rem;            outline: none;
+
+            min-width: 150px;            padding: 0.75rem;
+
+        }            font-size: 0.9rem;
+
             border-radius: 8px;
-            background: #f7fafc;
-            color: #4a5568;
-            cursor: pointer;
-            min-width: 120px;
-        }
 
-        .add-note-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            white-space: nowrap;
-        }
+        .search-input {            background: #f7fafc;
 
-        .add-note-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        }
+            flex: 1;            color: #4a5568;
 
-        .export-btn {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.25rem;
-            border-radius: 12px;
+            padding: 0.75rem;            cursor: pointer;
+
+            border: 2px solid #e2e8f0;            min-width: 120px;
+
+            border-radius: 8px;        }
+
             font-size: 0.9rem;
+
+            transition: border-color 0.2s;        .add-note-btn {
+
+        }            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+            color: white;
+
+        .search-input:focus {            border: none;
+
+            outline: none;            padding: 0.75rem 1.5rem;
+
+            border-color: #667eea;            border-radius: 12px;
+
+        }            font-size: 1rem;
+
             font-weight: 600;
+
+        /* Notes Container */            cursor: pointer;
+
+        .notes-container {            transition: all 0.3s ease;
+
+            min-height: 400px;            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+
+        }            white-space: nowrap;
+
+        }
+
+        .notes-grid {
+
+            display: grid;        .add-note-btn:hover {
+
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));            transform: translateY(-2px);
+
+            gap: 1.5rem;            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+
+        }        }
+
+
+
+        .note-item {        .export-btn {
+
+            background: white;            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+
+            border-radius: 12px;            color: white;
+
+            padding: 1.5rem;            border: none;
+
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);            padding: 0.75rem 1.25rem;
+
+            transition: all 0.3s;            border-radius: 12px;
+
+            border: 1px solid #e2e8f0;            font-size: 0.9rem;
+
+        }            font-weight: 600;
+
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
-            white-space: nowrap;
-        }
 
-        .export-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.6);
-        }
+        .note-item:hover {            transition: all 0.3s ease;
 
-        .export-btn:disabled {
-            opacity: 0.5;
+            transform: translateY(-2px);            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);            white-space: nowrap;
+
+        }        }
+
+
+
+        .note-header {        .export-btn:hover:not(:disabled) {
+
+            display: flex;            transform: translateY(-2px);
+
+            justify-content: space-between;            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.6);
+
+            align-items: flex-start;        }
+
+            margin-bottom: 1rem;
+
+            gap: 1rem;        .export-btn:disabled {
+
+        }            opacity: 0.5;
+
             cursor: not-allowed;
-            transform: none;
-            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.2);
-        }
 
-        /* Note Form */
-        .note-form-container {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-        }
+        .note-subject {            transform: none;
 
-        .note-form h3 {
-            color: #4a5568;
-            margin-bottom: 1.5rem;
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
+            font-size: 1.1rem;            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.2);
 
-        .form-row {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
+            font-weight: 600;        }
 
-        .form-group {
-            margin-bottom: 1.5rem;
-            flex: 1;
-        }
-
-        .form-group-small {
-            flex: 0 0 200px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #4a5568;
-            font-weight: 500;
-        }
-
-        .form-input,
-        .form-textarea,
-        .form-select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-            outline: none;
-            background: white;
-        }
-
-        .form-input:focus,
-        .form-textarea:focus,
-        .form-select:focus {
-            border-color: #667eea;
-        }
-
-        .form-select {
-            cursor: pointer;
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 120px;
-            font-family: inherit;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.6);
-        }
-
-        .btn-secondary {
-            background: #e2e8f0;
-            color: #4a5568;
-        }
-
-        .btn-secondary:hover {
-            background: #cbd5e0;
-        }
-
-        /* Notes List */
-        .notes-list {
-            display: grid;
-            gap: 1.5rem;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: #718096;
-        }
-
-        .empty-state p {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Note Card */
-        .note-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-        }
-
-        .note-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-        }
-
-        .note-card.editing {
-            border: 2px solid #667eea;
-            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
-        }
-
-        .note-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-        }
-
-        .note-subject {
-            color: #4a5568;
-            font-size: 1.2rem;
-            font-weight: 600;
-            flex: 1;
-            margin-right: 1rem;
-        }
-
-        .note-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .edit-btn,
-        .delete-btn,
-        .save-btn,
-        .cancel-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.1rem;
-            padding: 0.25rem;
-            border-radius: 4px;
-            transition: background-color 0.3s ease;
-        }
-
-        .edit-btn:hover {
-            background-color: #e6fffa;
-        }
-
-        .delete-btn:hover {
-            background-color: #fed7d7;
-        }
-
-        .save-btn:hover {
-            background-color: #c6f6d5;
-        }
-
-        .cancel-btn:hover {
-            background-color: #fed7d7;
-        }
-
-        .edit-subject-input {
-            flex: 1;
-            border: none;
-            outline: none;
-            background: transparent;
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #4a5568;
-            margin-right: 1rem;
-            padding: 0.25rem;
-            border-bottom: 2px solid #667eea;
-        }
-
-        .edit-content-textarea {
-            width: 100%;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 0.75rem;
-            font-size: 1rem;
-            font-family: inherit;
-            resize: vertical;
-            min-height: 80px;
-            outline: none;
-            transition: border-color 0.3s ease;
-        }
-
-        .edit-content-textarea:focus {
-            border-color: #667eea;
-        }
-
-        .edit-actions {
-            display: flex;
-            gap: 0.25rem;
-        }
-
-        .note-content {
-            margin-bottom: 1rem;
-        }
-
-        .note-content p {
             color: #2d3748;
-            line-height: 1.6;
-            white-space: pre-wrap;
-        }
 
-        .note-footer {
-            border-top: 1px solid #e2e8f0;
-            padding-top: 0.75rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.5rem;
+            line-height: 1.4;        /* Note Form */
+
+            flex: 1;        .note-form-container {
+
+        }            background: white;
+
+            border-radius: 16px;
+
+        .note-actions {            padding: 2rem;
+
+            display: flex;            margin-bottom: 2rem;
+
+            gap: 0.5rem;            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+            flex-shrink: 0;            backdrop-filter: blur(10px);
+
+        }        }
+
+
+
+        .note-content {        .note-form h3 {
+
+            color: #4a5568;            color: #4a5568;
+
+            line-height: 1.6;            margin-bottom: 1.5rem;
+
+            margin-bottom: 1rem;            font-size: 1.5rem;
+
+            white-space: pre-wrap;            font-weight: 600;
+
+        }        }
+
+
+
+        .note-footer {        .form-row {
+
+            border-top: 1px solid #e2e8f0;            display: flex;
+
+            padding-top: 0.75rem;            gap: 1rem;
+
+        }            margin-bottom: 1.5rem;
+
         }
 
         .note-date {
+
+            color: #718096;        .form-group {
+
+            font-size: 0.8rem;            margin-bottom: 1.5rem;
+
+        }            flex: 1;
+
+        }
+
+        /* Form Overlay */
+
+        .note-form-overlay {        .form-group-small {
+
+            position: fixed;            flex: 0 0 200px;
+
+            top: 0;        }
+
+            left: 0;
+
+            right: 0;        .form-group label {
+
+            bottom: 0;            display: block;
+
+            background: rgba(0, 0, 0, 0.5);            margin-bottom: 0.5rem;
+
+            display: flex;            color: #4a5568;
+
+            align-items: center;            font-weight: 500;
+
+            justify-content: center;        }
+
+            z-index: 1000;
+
+            padding: 1rem;        .form-input,
+
+        }        .form-textarea,
+
+        .form-select {
+
+        .note-form {            width: 100%;
+
+            background: white;            padding: 0.75rem;
+
+            border-radius: 12px;            border: 2px solid #e2e8f0;
+
+            padding: 2rem;            border-radius: 8px;
+
+            max-width: 600px;            font-size: 1rem;
+
+            width: 100%;            transition: border-color 0.3s ease;
+
+            max-height: 90vh;            outline: none;
+
+            overflow-y: auto;            background: white;
+
+        }        }
+
+
+
+        .form-group {        .form-input:focus,
+
+            margin-bottom: 1.5rem;        .form-textarea:focus,
+
+        }        .form-select:focus {
+
+            border-color: #667eea;
+
+        .form-group label {        }
+
+            display: block;
+
+            margin-bottom: 0.5rem;        .form-select {
+
+            font-weight: 600;            cursor: pointer;
+
+            color: #2d3748;        }
+
+        }
+
+        .form-textarea {
+
+        .form-group input,            resize: vertical;
+
+        .form-group textarea {            min-height: 120px;
+
+            width: 100%;            font-family: inherit;
+
+            padding: 0.75rem;        }
+
+            border: 2px solid #e2e8f0;
+
+            border-radius: 8px;        .form-actions {
+
+            font-size: 0.9rem;            display: flex;
+
+            font-family: inherit;            gap: 1rem;
+
+            transition: border-color 0.2s;            justify-content: flex-end;
+
+        }        }
+
+
+
+        .form-group input:focus,        .btn {
+
+        .form-group textarea:focus {            padding: 0.75rem 1.5rem;
+
+            outline: none;            border: none;
+
+            border-color: #667eea;            border-radius: 8px;
+
+        }            font-size: 1rem;
+
+            font-weight: 600;
+
+        .form-actions {            cursor: pointer;
+
+            display: flex;            transition: all 0.3s ease;
+
+            gap: 1rem;        }
+
+            justify-content: flex-end;
+
+        }        .btn-primary {
+
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+
+        /* Empty State */            color: white;
+
+        .empty-state {            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+
+            text-align: center;        }
+
+            padding: 4rem 2rem;
+
+            color: #718096;        .btn-primary:hover {
+
+        }            transform: translateY(-2px);
+
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.6);
+
+        .empty-state h3 {        }
+
+            font-size: 1.5rem;
+
+            margin-bottom: 1rem;        .btn-secondary {
+
+            color: #4a5568;            background: #e2e8f0;
+
+        }            color: #4a5568;
+
+        }
+
+        /* Loading State */
+
+        .loading-state {        .btn-secondary:hover {
+
+            text-align: center;            background: #cbd5e0;
+
+            padding: 4rem 2rem;        }
+
+        }
+
+        /* Notes List */
+
+        .loader {        .notes-list {
+
+            width: 40px;            display: grid;
+
+            height: 40px;            gap: 1.5rem;
+
+            border: 4px solid #e2e8f0;            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+
+            border-top: 4px solid #667eea;        }
+
+            border-radius: 50%;
+
+            animation: spin 1s linear infinite;        .empty-state {
+
+            margin: 0 auto 1rem;            text-align: center;
+
+        }            padding: 4rem 2rem;
+
             color: #718096;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
 
-        .note-category {
-            color: #4a5568;
-            font-size: 0.85rem;
-            font-weight: 500;
-            background: #f7fafc;
-            padding: 0.25rem 0.5rem;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
+        @keyframes spin {        }
 
-        .edit-category-select {
-            border: none;
-            background: transparent;
-            font-size: 0.85rem;
-            cursor: pointer;
-            outline: none;
-            margin-left: 0.25rem;
-        }
+            0% { transform: rotate(0deg); }
 
-        .updated-indicator {
-            color: #718096;
-            font-style: italic;
-            font-size: 0.85em;
-        }
+            100% { transform: rotate(360deg); }        .empty-state p {
 
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .app-title {
-                font-size: 2rem;
+        }            font-size: 1.1rem;
+
+            margin-bottom: 0.5rem;
+
+        /* Error Message */        }
+
+        .error-message {
+
+            background: #fed7d7;        /* Note Card */
+
+            color: #c53030;        .note-card {
+
+            padding: 1rem;            background: white;
+
+            border-radius: 8px;            border-radius: 16px;
+
+            margin-bottom: 1rem;            padding: 1.5rem;
+
+            border: 1px solid #fca5a5;            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+        }            transition: all 0.3s ease;
+
+            border: 1px solid rgba(255, 255, 255, 0.2);
+
+        /* Success Message */            backdrop-filter: blur(10px);
+
+        .success-message {        }
+
+            background: #c6f6d5;
+
+            color: #22543d;        .note-card:hover {
+
+            padding: 1rem;            transform: translateY(-4px);
+
+            border-radius: 8px;            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+
+            margin-bottom: 1rem;        }
+
+            border: 1px solid #9ae6b4;
+
+        }        .note-card.editing {
+
+            border: 2px solid #667eea;
+
+        /* Responsive */            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+
+        @media (max-width: 768px) {        }
+
+            .header-content {
+
+                flex-direction: column;        .note-header {
+
+                text-align: center;            display: flex;
+
+            }            justify-content: space-between;
+
+            align-items: flex-start;
+
+            .notes-grid {            margin-bottom: 1rem;
+
+                grid-template-columns: 1fr;        }
+
             }
 
-            .controls {
+        .note-subject {
+
+            .search-input-group {            color: #4a5568;
+
+                flex-direction: column;            font-size: 1.2rem;
+
+                max-width: none;            font-weight: 600;
+
+            }            flex: 1;
+
+            margin-right: 1rem;
+
+            .note-header {        }
+
                 flex-direction: column;
-                align-items: stretch;
-                gap: 1rem;
+
+                gap: 1rem;        .note-actions {
+
+            }            display: flex;
+
+            gap: 0.5rem;
+
+            .note-actions {        }
+
+                align-self: stretch;
+
+                justify-content: center;        .edit-btn,
+
+            }        .delete-btn,
+
+        .save-btn,
+
+            .form-actions {        .cancel-btn {
+
+                flex-direction: column;            background: none;
+
+            }            border: none;
+
+        }            cursor: pointer;
+
+            font-size: 1.1rem;
+
+        @media (max-width: 480px) {            padding: 0.25rem;
+
+            .main-content {            border-radius: 4px;
+
+                padding: 1rem;            transition: background-color 0.3s ease;
+
+            }        }
+
+
+
+            .note-form {        .edit-btn:hover {
+
+                padding: 1rem;            background-color: #e6fffa;
+
+            }        }
+
+        }
+
+    </style>        .delete-btn:hover {
+
+</head>            background-color: #fed7d7;
+
+<body>        }
+
+    <div id="root"></div>
+
+        .save-btn:hover {
+
+    <script type="text/babel">            background-color: #c6f6d5;
+
+        const { useState, useEffect, useRef } = React;        }
+
+
+
+        // Classe para gerenciar IndexedDB        .cancel-btn:hover {
+
+        class NotesDB {            background-color: #fed7d7;
+
+            constructor() {        }
+
+                this.dbName = 'NotesAppDB';
+
+                this.version = 1;        .edit-subject-input {
+
+                this.db = null;            flex: 1;
+
+            }            border: none;
+
+            outline: none;
+
+            async init() {            background: transparent;
+
+                return new Promise((resolve, reject) => {            font-size: 1.2rem;
+
+                    const request = indexedDB.open(this.dbName, this.version);            font-weight: 600;
+
+            color: #4a5568;
+
+                    request.onerror = () => reject(request.error);            margin-right: 1rem;
+
+                    request.onsuccess = () => {            padding: 0.25rem;
+
+                        this.db = request.result;            border-bottom: 2px solid #667eea;
+
+                        resolve();        }
+
+                    };
+
+        .edit-content-textarea {
+
+                    request.onupgradeneeded = (event) => {            width: 100%;
+
+                        const db = event.target.result;            border: 2px solid #e2e8f0;
+
+            border-radius: 8px;
+
+                        // Store principal para notas            padding: 0.75rem;
+
+                        if (!db.objectStoreNames.contains('notes')) {            font-size: 1rem;
+
+                            const notesStore = db.createObjectStore('notes', { keyPath: 'id' });            font-family: inherit;
+
+                            notesStore.createIndex('subject', 'subject', { unique: false });            resize: vertical;
+
+                            notesStore.createIndex('content', 'content', { unique: false });            min-height: 80px;
+
+                            notesStore.createIndex('createdAt', 'createdAt', { unique: false });            outline: none;
+
+                        }            transition: border-color 0.3s ease;
+
+        }
+
+                        // Store para configurações
+
+                        if (!db.objectStoreNames.contains('settings')) {        .edit-content-textarea:focus {
+
+                            db.createObjectStore('settings', { keyPath: 'key' });            border-color: #667eea;
+
+                        }        }
+
+                    };
+
+                });        .edit-actions {
+
+            }            display: flex;
+
+            gap: 0.25rem;
+
+            async getAllNotes() {        }
+
+                const transaction = this.db.transaction(['notes'], 'readonly');
+
+                const store = transaction.objectStore('notes');        .note-content {
+
+                            margin-bottom: 1rem;
+
+                return new Promise((resolve, reject) => {        }
+
+                    const request = store.getAll();
+
+                    request.onsuccess = () => resolve(request.result || []);        .note-content p {
+
+                    request.onerror = () => reject(request.error);            color: #2d3748;
+
+                });            line-height: 1.6;
+
+            }            white-space: pre-wrap;
+
+        }
+
+            async addNote(note) {
+
+                const id = Date.now().toString();        .note-footer {
+
+                const noteData = {            border-top: 1px solid #e2e8f0;
+
+                    ...note,            padding-top: 0.75rem;
+
+                    id,            display: flex;
+
+                    createdAt: new Date().toISOString(),            justify-content: space-between;
+
+                    updatedAt: new Date().toISOString()            align-items: center;
+
+                };            flex-wrap: wrap;
+
+            gap: 0.5rem;
+
+                const transaction = this.db.transaction(['notes'], 'readwrite');        }
+
+                const store = transaction.objectStore('notes');
+
+                        .note-date {
+
+                return new Promise((resolve, reject) => {            color: #718096;
+
+                    const request = store.add(noteData);            font-size: 0.9rem;
+
+                    request.onsuccess = () => resolve(noteData);            display: flex;
+
+                    request.onerror = () => reject(request.error);            align-items: center;
+
+                });            gap: 0.5rem;
+
+            }        }
+
+
+
+            async updateNote(id, updates) {        .note-category {
+
+                const transaction = this.db.transaction(['notes'], 'readwrite');            color: #4a5568;
+
+                const store = transaction.objectStore('notes');            font-size: 0.85rem;
+
+                            font-weight: 500;
+
+                return new Promise((resolve, reject) => {            background: #f7fafc;
+
+                    const getRequest = store.get(id);            padding: 0.25rem 0.5rem;
+
+                                border-radius: 12px;
+
+                    getRequest.onsuccess = () => {            display: flex;
+
+                        const note = getRequest.result;            align-items: center;
+
+                        if (!note) {            gap: 0.25rem;
+
+                            reject(new Error('Nota não encontrada'));        }
+
+                            return;
+
+                        }        .edit-category-select {
+
+            border: none;
+
+                        const updatedNote = {            background: transparent;
+
+                            ...note,            font-size: 0.85rem;
+
+                            ...updates,            cursor: pointer;
+
+                            updatedAt: new Date().toISOString()            outline: none;
+
+                        };            margin-left: 0.25rem;
+
+        }
+
+                        const putRequest = store.put(updatedNote);
+
+                        putRequest.onsuccess = () => resolve(updatedNote);        .updated-indicator {
+
+                        putRequest.onerror = () => reject(putRequest.error);            color: #718096;
+
+                    };            font-style: italic;
+
+                                font-size: 0.85em;
+
+                    getRequest.onerror = () => reject(getRequest.error);        }
+
+                });
+
+            }        /* Responsividade */
+
+        @media (max-width: 768px) {
+
+            async deleteNote(id) {            .app-title {
+
+                const transaction = this.db.transaction(['notes'], 'readwrite');                font-size: 2rem;
+
+                const store = transaction.objectStore('notes');            }
+
+                
+
+                return new Promise((resolve, reject) => {            .controls {
+
+                    const request = store.delete(id);                flex-direction: column;
+
+                    request.onsuccess = () => resolve();                align-items: stretch;
+
+                    request.onerror = () => reject(request.error);                gap: 1rem;
+
+                });            }
+
             }
 
             .actions-group {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 1rem;
-            }
 
-            .search-bar {
-                min-width: auto;
-                order: -1;
-            }
+            async searchNotes(query, type = 'content') {                flex-direction: column;
 
-            .search-input-group {
-                flex-direction: column;
-            }
+                const transaction = this.db.transaction(['notes'], 'readonly');                align-items: stretch;
 
-            .stats {
-                justify-content: center;
+                const store = transaction.objectStore('notes');                gap: 1rem;
+
+                            }
+
+                return new Promise((resolve, reject) => {
+
+                    let request;            .search-bar {
+
+                                    min-width: auto;
+
+                    if (type === 'subject') {                order: -1;
+
+                        const index = store.index('subject');            }
+
+                        request = index.getAll();
+
+                    } else if (type === 'content') {            .search-input-group {
+
+                        const index = store.index('content');                flex-direction: column;
+
+                        request = index.getAll();            }
+
+                    } else {
+
+                        request = store.getAll();            .stats {
+
+                    }                justify-content: center;
+
                 flex-wrap: wrap;
-            }
 
-            .form-row {
-                flex-direction: column;
-            }
+                    request.onsuccess = () => {            }
 
-            .form-group-small {
-                flex: 1;
-            }
+                        const results = request.result.filter(note => {
 
-            .notes-list {
-                grid-template-columns: 1fr;
-            }
+                            const searchText = query.toLowerCase();            .form-row {
 
-            .note-form-container {
-                padding: 1.5rem;
-            }
+                                            flex-direction: column;
 
-            .form-actions {
-                flex-direction: column;
-            }
+                            if (type === 'subject') {            }
 
-            .main-content {
-                padding: 1rem;
-            }
+                                return note.subject.toLowerCase().includes(searchText);
 
-            .note-footer {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.75rem;
-            }
+                            } else if (type === 'content') {            .form-group-small {
 
-            .export-btn,
-            .add-note-btn {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div id="root"></div>
+                                return note.content.toLowerCase().includes(searchText);                flex: 1;
 
-    <script type="text/babel">
-        // Hook para localStorage
-        function useLocalStorage(key, defaultValue) {
+                            } else if (type === 'date') {            }
+
+                                const noteDate = new Date(note.createdAt).toLocaleDateString('pt-BR');
+
+                                return noteDate.includes(query);            .notes-list {
+
+                            }                grid-template-columns: 1fr;
+
+                                        }
+
+                            return (
+
+                                note.subject.toLowerCase().includes(searchText) ||            .note-form-container {
+
+                                note.content.toLowerCase().includes(searchText)                padding: 1.5rem;
+
+                            );            }
+
+                        });
+
+                                    .form-actions {
+
+                        resolve(results);                flex-direction: column;
+
+                    };            }
+
+                    
+
+                    request.onerror = () => reject(request.error);            .main-content {
+
+                });                padding: 1rem;
+
+            }            }
+
+
+
+            async exportNotes() {            .note-footer {
+
+                const notes = await this.getAllNotes();                flex-direction: column;
+
+                const data = {                align-items: flex-start;
+
+                    notes,                gap: 0.75rem;
+
+                    exportDate: new Date().toISOString(),            }
+
+                    version: '2.0'
+
+                };            .export-btn,
+
+                            .add-note-btn {
+
+                const blob = new Blob([JSON.stringify(data, null, 2)], {                 width: 100%;
+
+                    type: 'application/json'                 justify-content: center;
+
+                });            }
+
+                        }
+
+                const url = URL.createObjectURL(blob);    </style>
+
+                const a = document.createElement('a');</head>
+
+                a.href = url;<body>
+
+                a.download = `anotacoes-${new Date().toISOString().split('T')[0]}.json`;    <div id="root"></div>
+
+                a.click();
+
+                    <script type="text/babel">
+
+                URL.revokeObjectURL(url);        // Hook para localStorage
+
+            }        function useLocalStorage(key, defaultValue) {
+
             const [value, setValue] = React.useState(() => {
-                try {
-                    const item = window.localStorage.getItem(key);
-                    return item ? JSON.parse(item) : defaultValue;
-                } catch (error) {
-                    console.error(`Erro ao ler ${key} do localStorage:`, error);
-                    return defaultValue;
-                }
-            });
 
-            const setStoredValue = React.useCallback((newValue) => {
-                try {
-                    const valueToStore = newValue instanceof Function ? newValue(value) : newValue;
-                    setValue(valueToStore);
-                    window.localStorage.setItem(key, JSON.stringify(valueToStore));
-                } catch (error) {
-                    console.error(`Erro ao salvar ${key} no localStorage:`, error);
-                }
-            }, [key, value]);
+            async importNotes(file) {                try {
 
-            return [value, setStoredValue];
-        }
+                return new Promise((resolve, reject) => {                    const item = window.localStorage.getItem(key);
 
-        // Componente Header
-        function Header() {
-            return (
-                <header className="header">
-                    <div className="header-content">
-                        <h1 className="app-title">📝 Bloco de Anotações</h1>
-                        <p className="app-subtitle">Organize suas ideias de forma simples</p>
-                    </div>
-                </header>
-            );
-        }
+                    const reader = new FileReader();                    return item ? JSON.parse(item) : defaultValue;
 
-        // Componente SearchBar
-        function SearchBar({ searchTerm, setSearchTerm, searchType, setSearchType }) {
-            return (
-                <div className="search-bar">
-                    <div className="search-input-group">
-                        <input
+                                    } catch (error) {
+
+                    reader.onload = async (e) => {                    console.error(`Erro ao ler ${key} do localStorage:`, error);
+
+                        try {                    return defaultValue;
+
+                            const data = JSON.parse(e.target.result);                }
+
+                            const notes = data.notes || [];            });
+
+                            
+
+                            const transaction = this.db.transaction(['notes'], 'readwrite');            const setStoredValue = React.useCallback((newValue) => {
+
+                            const store = transaction.objectStore('notes');                try {
+
+                                                const valueToStore = newValue instanceof Function ? newValue(value) : newValue;
+
+                            let imported = 0;                    setValue(valueToStore);
+
+                                                window.localStorage.setItem(key, JSON.stringify(valueToStore));
+
+                            for (const note of notes) {                } catch (error) {
+
+                                try {                    console.error(`Erro ao salvar ${key} no localStorage:`, error);
+
+                                    await new Promise((resolveNote, rejectNote) => {                }
+
+                                        const request = store.put(note);            }, [key, value]);
+
+                                        request.onsuccess = () => {
+
+                                            imported++;            return [value, setStoredValue];
+
+                                            resolveNote();        }
+
+                                        };
+
+                                        request.onerror = () => rejectNote(request.error);        // Componente Header
+
+                                    });        function Header() {
+
+                                } catch (error) {            return (
+
+                                    console.warn('Erro ao importar nota:', error);                <header className="header">
+
+                                }                    <div className="header-content">
+
+                            }                        <h1 className="app-title">📝 Bloco de Anotações</h1>
+
+                                                    <p className="app-subtitle">Organize suas ideias de forma simples</p>
+
+                            resolve(imported);                    </div>
+
+                        } catch (error) {                </header>
+
+                            reject(error);            );
+
+                        }        }
+
+                    };
+
+                            // Componente SearchBar
+
+                    reader.onerror = () => reject(reader.error);        function SearchBar({ searchTerm, setSearchTerm, searchType, setSearchType }) {
+
+                    reader.readAsText(file);            return (
+
+                });                <div className="search-bar">
+
+            }                    <div className="search-input-group">
+
+        }                        <input
+
                             type="text"
-                            placeholder={searchType === 'subject' ? 'Buscar por assunto...' : 'Buscar por data (dd/mm/aaaa)...'}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="search-input"
-                        />
-                        <select
-                            value={searchType}
-                            onChange={(e) => setSearchType(e.target.value)}
-                            className="search-select"
-                        >
-                            <option value="subject">Por Assunto</option>
-                            <option value="date">Por Data</option>
-                        </select>
-                    </div>
-                </div>
-            );
-        }
 
-        // Componente NoteForm
-        function NoteForm({ onSubmit, onCancel }) {
-            const [subject, setSubject] = React.useState('');
-            const [content, setContent] = React.useState('');
+        // Hook customizado para IndexedDB                            placeholder={searchType === 'subject' ? 'Buscar por assunto...' : 'Buscar por data (dd/mm/aaaa)...'}
+
+        function useIndexedDB() {                            value={searchTerm}
+
+            const [notes, setNotes] = useState([]);                            onChange={(e) => setSearchTerm(e.target.value)}
+
+            const [isLoading, setIsLoading] = useState(true);                            className="search-input"
+
+            const [error, setError] = useState(null);                        />
+
+            const dbRef = useRef(null);                        <select
+
+                            value={searchType}
+
+            useEffect(() => {                            onChange={(e) => setSearchType(e.target.value)}
+
+                async function initDB() {                            className="search-select"
+
+                    try {                        >
+
+                        dbRef.current = new NotesDB();                            <option value="subject">Por Assunto</option>
+
+                        await dbRef.current.init();                            <option value="date">Por Data</option>
+
+                        const allNotes = await dbRef.current.getAllNotes();                        </select>
+
+                        setNotes(allNotes);                    </div>
+
+                        setError(null);                </div>
+
+                    } catch (error) {            );
+
+                        console.error('Erro ao inicializar banco:', error);        }
+
+                        setError('Erro ao carregar dados');
+
+                    } finally {        // Componente NoteForm
+
+                        setIsLoading(false);        function NoteForm({ onSubmit, onCancel }) {
+
+                    }            const [subject, setSubject] = React.useState('');
+
+                }            const [content, setContent] = React.useState('');
+
             const [category, setCategory] = React.useState('geral');
 
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                
-                if (subject.trim() && content.trim()) {
-                    onSubmit({
-                        subject: subject.trim(),
-                        content: content.trim(),
-                        category: category
-                    });
-                    setSubject('');
-                    setContent('');
-                    setCategory('geral');
-                }
-            };
+                initDB();
 
-            return (
-                <div className="note-form-container">
-                    <form onSubmit={handleSubmit} className="note-form">
-                        <h3>Nova Anotação</h3>
-                        
-                        <div className="form-row">
-                            <div className="form-group">
-                                <label htmlFor="subject">Assunto:</label>
-                                <input
-                                    type="text"
+            }, []);            const handleSubmit = (e) => {
+
+                e.preventDefault();
+
+            const addNote = async (noteData) => {                
+
+                try {                if (subject.trim() && content.trim()) {
+
+                    const newNote = await dbRef.current.addNote(noteData);                    onSubmit({
+
+                    setNotes(prev => [newNote, ...prev]);                        subject: subject.trim(),
+
+                    return newNote;                        content: content.trim(),
+
+                } catch (error) {                        category: category
+
+                    console.error('Erro ao adicionar nota:', error);                    });
+
+                    throw error;                    setSubject('');
+
+                }                    setContent('');
+
+            };                    setCategory('geral');
+
+                }
+
+            const updateNote = async (id, updates) => {            };
+
+                try {
+
+                    const updatedNote = await dbRef.current.updateNote(id, updates);            return (
+
+                    setNotes(prev => prev.map(note =>                 <div className="note-form-container">
+
+                        note.id === id ? updatedNote : note                    <form onSubmit={handleSubmit} className="note-form">
+
+                    ));                        <h3>Nova Anotação</h3>
+
+                    return updatedNote;                        
+
+                } catch (error) {                        <div className="form-row">
+
+                    console.error('Erro ao atualizar nota:', error);                            <div className="form-group">
+
+                    throw error;                                <label htmlFor="subject">Assunto:</label>
+
+                }                                <input
+
+            };                                    type="text"
+
                                     id="subject"
-                                    value={subject}
-                                    onChange={(e) => setSubject(e.target.value)}
-                                    placeholder="Digite o assunto da anotação"
-                                    required
-                                    className="form-input"
-                                    autoFocus
-                                />
-                            </div>
+
+            const deleteNote = async (id) => {                                    value={subject}
+
+                try {                                    onChange={(e) => setSubject(e.target.value)}
+
+                    await dbRef.current.deleteNote(id);                                    placeholder="Digite o assunto da anotação"
+
+                    setNotes(prev => prev.filter(note => note.id !== id));                                    required
+
+                } catch (error) {                                    className="form-input"
+
+                    console.error('Erro ao excluir nota:', error);                                    autoFocus
+
+                    throw error;                                />
+
+                }                            </div>
+
+            };
 
                             <div className="form-group form-group-small">
-                                <label htmlFor="category">Categoria:</label>
-                                <select
-                                    id="category"
-                                    value={category}
-                                    onChange={(e) => setCategory(e.target.value)}
-                                    className="form-select"
-                                >
-                                    <option value="geral">📋 Geral</option>
+
+            const searchNotes = async (query, type) => {                                <label htmlFor="category">Categoria:</label>
+
+                try {                                <select
+
+                    return await dbRef.current.searchNotes(query, type);                                    id="category"
+
+                } catch (error) {                                    value={category}
+
+                    console.error('Erro na busca:', error);                                    onChange={(e) => setCategory(e.target.value)}
+
+                    return [];                                    className="form-select"
+
+                }                                >
+
+            };                                    <option value="geral">📋 Geral</option>
+
                                     <option value="trabalho">💼 Trabalho</option>
-                                    <option value="pessoal">👤 Pessoal</option>
-                                    <option value="estudo">📚 Estudo</option>
-                                    <option value="ideias">💡 Ideias</option>
-                                    <option value="tarefas">✅ Tarefas</option>
-                                    <option value="compras">🛒 Compras</option>
-                                    <option value="viagem">✈️ Viagem</option>
-                                </select>
-                            </div>
+
+            const exportNotes = async () => {                                    <option value="pessoal">👤 Pessoal</option>
+
+                try {                                    <option value="estudo">📚 Estudo</option>
+
+                    await dbRef.current.exportNotes();                                    <option value="ideias">💡 Ideias</option>
+
+                } catch (error) {                                    <option value="tarefas">✅ Tarefas</option>
+
+                    console.error('Erro ao exportar:', error);                                    <option value="compras">🛒 Compras</option>
+
+                    throw error;                                    <option value="viagem">✈️ Viagem</option>
+
+                }                                </select>
+
+            };                            </div>
+
                         </div>
 
-                        <div className="form-group">
-                            <label htmlFor="content">Conteúdo:</label>
-                            <textarea
-                                id="content"
-                                value={content}
-                                onChange={(e) => setContent(e.target.value)}
-                                placeholder="Digite o conteúdo da anotação"
-                                required
-                                rows="6"
-                                className="form-textarea"
+            const importNotes = async (file) => {
+
+                try {                        <div className="form-group">
+
+                    const imported = await dbRef.current.importNotes(file);                            <label htmlFor="content">Conteúdo:</label>
+
+                    const allNotes = await dbRef.current.getAllNotes();                            <textarea
+
+                    setNotes(allNotes);                                id="content"
+
+                    return imported;                                value={content}
+
+                } catch (error) {                                onChange={(e) => setContent(e.target.value)}
+
+                    console.error('Erro ao importar:', error);                                placeholder="Digite o conteúdo da anotação"
+
+                    throw error;                                required
+
+                }                                rows="6"
+
+            };                                className="form-textarea"
+
                             />
-                        </div>
 
-                        <div className="form-actions">
-                            <button type="submit" className="btn btn-primary">
-                                Salvar
-                            </button>
-                            <button type="button" onClick={onCancel} className="btn btn-secondary">
-                                Cancelar
-                            </button>
-                        </div>
-                    </form>
-                </div>
+            return {                        </div>
+
+                notes,
+
+                isLoading,                        <div className="form-actions">
+
+                error,                            <button type="submit" className="btn btn-primary">
+
+                addNote,                                Salvar
+
+                updateNote,                            </button>
+
+                deleteNote,                            <button type="button" onClick={onCancel} className="btn btn-secondary">
+
+                searchNotes,                                Cancelar
+
+                exportNotes,                            </button>
+
+                importNotes                        </div>
+
+            };                    </form>
+
+        }                </div>
+
             );
-        }
 
-        // Componente NoteCard
-        function NoteCard({ note, onDelete, onEdit }) {
-            const [isEditing, setIsEditing] = React.useState(false);
-            const [editSubject, setEditSubject] = React.useState(note.subject);
-            const [editContent, setEditContent] = React.useState(note.content);
-            const [editCategory, setEditCategory] = React.useState(note.category || 'geral');
+        // Componente Header        }
 
-            const formatDate = (dateString) => {
-                const date = new Date(dateString);
-                return date.toLocaleDateString('pt-BR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            };
+        const Header = ({ onAddNote, totalNotes, onExportNotes }) => {
 
-            const getCategoryIcon = (category) => {
+            return (        // Componente NoteCard
+
+                <header className="header">        function NoteCard({ note, onDelete, onEdit }) {
+
+                    <div className="header-content">            const [isEditing, setIsEditing] = React.useState(false);
+
+                        <h1 className="app-title">📝 Bloco de Anotações</h1>            const [editSubject, setEditSubject] = React.useState(note.subject);
+
+                        <div className="header-stats">            const [editContent, setEditContent] = React.useState(note.content);
+
+                            <span className="note-count">{totalNotes} anotações</span>            const [editCategory, setEditCategory] = React.useState(note.category || 'geral');
+
+                        </div>
+
+                        <div className="header-actions">            const formatDate = (dateString) => {
+
+                            <button onClick={onAddNote} className="btn btn-primary" title="Nova anotação (Ctrl+N)">                const date = new Date(dateString);
+
+                                ➕ Nova                return date.toLocaleDateString('pt-BR', {
+
+                            </button>                    day: '2-digit',
+
+                            <button onClick={onExportNotes} className="btn btn-secondary" title="Exportar (Ctrl+E)">                    month: '2-digit',
+
+                                💾 Exportar                    year: 'numeric',
+
+                            </button>                    hour: '2-digit',
+
+                        </div>                    minute: '2-digit'
+
+                    </div>                });
+
+                </header>            };
+
+            );
+
+        };            const getCategoryIcon = (category) => {
+
                 const categories = {
-                    'geral': '📋',
-                    'trabalho': '💼',
-                    'pessoal': '👤',
-                    'estudo': '📚',
-                    'ideias': '💡',
-                    'tarefas': '✅',
-                    'compras': '🛒',
-                    'viagem': '✈️'
-                };
-                return categories[category] || '📋';
+
+        // Componente SearchBar                    'geral': '📋',
+
+        const SearchBar = ({ searchTerm, onSearchChange, searchType, onSearchTypeChange }) => {                    'trabalho': '💼',
+
+            return (                    'pessoal': '👤',
+
+                <div className="search-bar">                    'estudo': '📚',
+
+                    <div className="search-input-group">                    'ideias': '💡',
+
+                        <select                     'tarefas': '✅',
+
+                            value={searchType}                     'compras': '🛒',
+
+                            onChange={(e) => onSearchTypeChange(e.target.value)}                    'viagem': '✈️'
+
+                            className="search-type-select"                };
+
+                        >                return categories[category] || '📋';
+
+                            <option value="subject">Por Assunto</option>            };
+
+                            <option value="content">Por Conteúdo</option>
+
+                            <option value="date">Por Data</option>            const getCategoryName = (category) => {
+
+                        </select>                const categories = {
+
+                        <input                    'geral': 'Geral',
+
+                            type="text"                    'trabalho': 'Trabalho',
+
+                            value={searchTerm}                    'pessoal': 'Pessoal',
+
+                            onChange={(e) => onSearchChange(e.target.value)}                    'estudo': 'Estudo',
+
+                            placeholder={`Buscar ${searchType === 'subject' ? 'assunto' : searchType === 'content' ? 'conteúdo' : 'data'}...`}                    'ideias': 'Ideias',
+
+                            className="search-input"                    'tarefas': 'Tarefas',
+
+                        />                    'compras': 'Compras',
+
+                    </div>                    'viagem': 'Viagem'
+
+                </div>                };
+
+            );                return categories[category] || 'Geral';
+
+        };            };
+
+
+
+        // Componente NoteForm            const handleDelete = () => {
+
+        const NoteForm = ({ note, onSave, onCancel, isEditing }) => {                if (window.confirm('Tem certeza que deseja excluir esta anotação?')) {
+
+            const [subject, setSubject] = useState(note?.subject || '');                    onDelete(note.id);
+
+            const [content, setContent] = useState(note?.content || '');                }
+
             };
 
-            const getCategoryName = (category) => {
-                const categories = {
-                    'geral': 'Geral',
-                    'trabalho': 'Trabalho',
-                    'pessoal': 'Pessoal',
-                    'estudo': 'Estudo',
-                    'ideias': 'Ideias',
-                    'tarefas': 'Tarefas',
-                    'compras': 'Compras',
-                    'viagem': 'Viagem'
-                };
-                return categories[category] || 'Geral';
-            };
+            const handleSubmit = (e) => {
 
-            const handleDelete = () => {
-                if (window.confirm('Tem certeza que deseja excluir esta anotação?')) {
-                    onDelete(note.id);
+                e.preventDefault();            const handleEdit = () => {
+
+                if (!subject.trim() || !content.trim()) return;                if (isEditing) {
+
+                                    if (editSubject.trim() && editContent.trim()) {
+
+                onSave({                        onEdit(note.id, {
+
+                    id: note?.id,                            subject: editSubject.trim(),
+
+                    subject: subject.trim(),                            content: editContent.trim(),
+
+                    content: content.trim(),                            category: editCategory
+
+                    createdAt: note?.createdAt || new Date().toISOString(),                        });
+
+                    updatedAt: new Date().toISOString()                        setIsEditing(false);
+
+                });                    }
+
+                                } else {
+
+                if (!isEditing) {                    setIsEditing(true);
+
+                    setSubject('');                }
+
+                    setContent('');            };
+
                 }
-            };
 
-            const handleEdit = () => {
-                if (isEditing) {
-                    if (editSubject.trim() && editContent.trim()) {
-                        onEdit(note.id, {
-                            subject: editSubject.trim(),
-                            content: editContent.trim(),
-                            category: editCategory
-                        });
-                        setIsEditing(false);
-                    }
-                } else {
-                    setIsEditing(true);
-                }
-            };
+            };            const handleCancel = () => {
 
-            const handleCancel = () => {
                 setEditSubject(note.subject);
-                setEditContent(note.content);
-                setEditCategory(note.category || 'geral');
-                setIsEditing(false);
-            };
 
-            if (isEditing) {
-                return (
-                    <div className="note-card editing">
-                        <div className="note-header">
-                            <input
-                                type="text"
-                                value={editSubject}
-                                onChange={(e) => setEditSubject(e.target.value)}
-                                className="edit-subject-input"
-                                autoFocus
-                            />
-                            <div className="edit-actions">
+            return (                setEditContent(note.content);
+
+                <div className="note-form-overlay" onClick={onCancel}>                setEditCategory(note.category || 'geral');
+
+                    <form className="note-form" onSubmit={handleSubmit} onClick={(e) => e.stopPropagation()}>                setIsEditing(false);
+
+                        <h3>{isEditing ? 'Editar Anotação' : 'Nova Anotação'}</h3>            };
+
+                        
+
+                        <div className="form-group">            if (isEditing) {
+
+                            <label htmlFor="subject">Assunto:</label>                return (
+
+                            <input                    <div className="note-card editing">
+
+                                id="subject"                        <div className="note-header">
+
+                                type="text"                            <input
+
+                                value={subject}                                type="text"
+
+                                onChange={(e) => setSubject(e.target.value)}                                value={editSubject}
+
+                                placeholder="Digite o assunto da anotação"                                onChange={(e) => setEditSubject(e.target.value)}
+
+                                autoFocus                                className="edit-subject-input"
+
+                                required                                autoFocus
+
+                            />                            />
+
+                        </div>                            <div className="edit-actions">
+
                                 <button 
-                                    className="save-btn"
-                                    onClick={handleEdit}
-                                    title="Salvar alterações"
-                                >
-                                    ✅
-                                </button>
-                                <button 
-                                    className="cancel-btn"
-                                    onClick={handleCancel}
-                                    title="Cancelar edição"
-                                >
+
+                        <div className="form-group">                                    className="save-btn"
+
+                            <label htmlFor="content">Conteúdo:</label>                                    onClick={handleEdit}
+
+                            <textarea                                    title="Salvar alterações"
+
+                                id="content"                                >
+
+                                value={content}                                    ✅
+
+                                onChange={(e) => setContent(e.target.value)}                                </button>
+
+                                placeholder="Digite o conteúdo da anotação"                                <button 
+
+                                rows={6}                                    className="cancel-btn"
+
+                                required                                    onClick={handleCancel}
+
+                            />                                    title="Cancelar edição"
+
+                        </div>                                >
+
                                     ❌
-                                </button>
-                            </div>
-                        </div>
+
+                        <div className="form-actions">                                </button>
+
+                            <button type="button" onClick={onCancel} className="btn btn-secondary">                            </div>
+
+                                Cancelar                        </div>
+
+                            </button>                        
+
+                            <button type="submit" className="btn btn-primary">                        <div className="note-content">
+
+                                {isEditing ? 'Salvar' : 'Adicionar'}                            <textarea
+
+                            </button>                                value={editContent}
+
+                        </div>                                onChange={(e) => setEditContent(e.target.value)}
+
+                    </form>                                className="edit-content-textarea"
+
+                </div>                                rows="4"
+
+            );                            />
+
+        };                        </div>
+
                         
-                        <div className="note-content">
-                            <textarea
-                                value={editContent}
-                                onChange={(e) => setEditContent(e.target.value)}
-                                className="edit-content-textarea"
-                                rows="4"
-                            />
-                        </div>
-                        
-                        <div className="note-footer">
-                            <span className="note-category">
-                                {getCategoryIcon(editCategory)}
-                                <select
-                                    value={editCategory}
-                                    onChange={(e) => setEditCategory(e.target.value)}
-                                    className="edit-category-select"
-                                >
-                                    <option value="geral">📋 Geral</option>
-                                    <option value="trabalho">💼 Trabalho</option>
-                                    <option value="pessoal">👤 Pessoal</option>
+
+        // Componente NoteItem                        <div className="note-footer">
+
+        const NoteItem = ({ note, onEdit, onDelete }) => {                            <span className="note-category">
+
+            const formatDate = (dateString) => {                                {getCategoryIcon(editCategory)}
+
+                return new Date(dateString).toLocaleDateString('pt-BR', {                                <select
+
+                    year: 'numeric',                                    value={editCategory}
+
+                    month: '2-digit',                                    onChange={(e) => setEditCategory(e.target.value)}
+
+                    day: '2-digit',                                    className="edit-category-select"
+
+                    hour: '2-digit',                                >
+
+                    minute: '2-digit'                                    <option value="geral">📋 Geral</option>
+
+                });                                    <option value="trabalho">💼 Trabalho</option>
+
+            };                                    <option value="pessoal">👤 Pessoal</option>
+
                                     <option value="estudo">📚 Estudo</option>
-                                    <option value="ideias">💡 Ideias</option>
-                                    <option value="tarefas">✅ Tarefas</option>
-                                    <option value="compras">🛒 Compras</option>
-                                    <option value="viagem">✈️ Viagem</option>
-                                </select>
-                            </span>
-                            <span className="note-date">
-                                📅 {formatDate(note.createdAt)}
-                                {note.updatedAt && <span className="updated-indicator"> • Editado</span>}
-                            </span>
-                        </div>
-                    </div>
-                );
-            }
 
-            return (
-                <div className="note-card">
-                    <div className="note-header">
-                        <h3 className="note-subject">{note.subject}</h3>
-                        <div className="note-actions">
-                            <button 
-                                className="edit-btn"
-                                onClick={handleEdit}
-                                title="Editar anotação"
-                            >
-                                ✏️
-                            </button>
-                            <button 
-                                className="delete-btn"
-                                onClick={handleDelete}
-                                title="Excluir anotação"
-                            >
-                                🗑️
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div className="note-content">
-                        <p>{note.content}</p>
-                    </div>
-                    
+            return (                                    <option value="ideias">💡 Ideias</option>
+
+                <div className="note-item">                                    <option value="tarefas">✅ Tarefas</option>
+
+                    <div className="note-header">                                    <option value="compras">🛒 Compras</option>
+
+                        <h3 className="note-subject">{note.subject}</h3>                                    <option value="viagem">✈️ Viagem</option>
+
+                        <div className="note-actions">                                </select>
+
+                            <button onClick={() => onEdit(note)} className="btn btn-small">                            </span>
+
+                                ✏️ Editar                            <span className="note-date">
+
+                            </button>                                📅 {formatDate(note.createdAt)}
+
+                            <button onClick={() => onDelete(note.id)} className="btn btn-small btn-danger">                                {note.updatedAt && <span className="updated-indicator"> • Editado</span>}
+
+                                🗑️ Excluir                            </span>
+
+                            </button>                        </div>
+
+                        </div>                    </div>
+
+                    </div>                );
+
+                    <p className="note-content">{note.content}</p>            }
+
                     <div className="note-footer">
-                        <span className="note-category">
-                            {getCategoryIcon(note.category)} {getCategoryName(note.category)}
-                        </span>
-                        <span className="note-date">
-                            📅 {formatDate(note.createdAt)}
-                            {note.updatedAt && <span className="updated-indicator"> • Editado</span>}
-                        </span>
-                    </div>
-                </div>
-            );
-        }
 
-        // Componente NotesList
-        function NotesList({ notes, onDelete, onEdit }) {
-            if (notes.length === 0) {
-                return (
-                    <div className="empty-state">
-                        <p>Nenhuma anotação encontrada.</p>
+                        <small className="note-date">            return (
+
+                            Criado: {formatDate(note.createdAt)}                <div className="note-card">
+
+                            {note.updatedAt && note.updatedAt !== note.createdAt && (                    <div className="note-header">
+
+                                <span> • Editado: {formatDate(note.updatedAt)}</span>                        <h3 className="note-subject">{note.subject}</h3>
+
+                            )}                        <div className="note-actions">
+
+                        </small>                            <button 
+
+                    </div>                                className="edit-btn"
+
+                </div>                                onClick={handleEdit}
+
+            );                                title="Editar anotação"
+
+        };                            >
+
+                                ✏️
+
+        // Componente Principal App                            </button>
+
+        function App() {                            <button 
+
+            const {                                 className="delete-btn"
+
+                notes,                                 onClick={handleDelete}
+
+                isLoading,                                 title="Excluir anotação"
+
+                error,                            >
+
+                addNote,                                 🗑️
+
+                updateNote,                             </button>
+
+                deleteNote,                         </div>
+
+                searchNotes,                    </div>
+
+                exportNotes: exportNotesDB                    
+
+            } = useIndexedDB();                    <div className="note-content">
+
+                        <p>{note.content}</p>
+
+            const [searchTerm, setSearchTerm] = useState('');                    </div>
+
+            const [searchType, setSearchType] = useState('subject');                    
+
+            const [showForm, setShowForm] = useState(false);                    <div className="note-footer">
+
+            const [editingNote, setEditingNote] = useState(null);                        <span className="note-category">
+
+            const [message, setMessage] = useState(null);                            {getCategoryIcon(note.category)} {getCategoryName(note.category)}
+
+                        </span>
+
+            // Atalhos de teclado                        <span className="note-date">
+
+            useEffect(() => {                            📅 {formatDate(note.createdAt)}
+
+                const handleKeyDown = (e) => {                            {note.updatedAt && <span className="updated-indicator"> • Editado</span>}
+
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'n') {                        </span>
+
+                        e.preventDefault();                    </div>
+
+                        setShowForm(true);                </div>
+
+                    }            );
+
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'e') {        }
+
+                        e.preventDefault();
+
+                        exportNotesDB();        // Componente NotesList
+
+                    }        function NotesList({ notes, onDelete, onEdit }) {
+
+                    if (e.key === 'Escape' && showForm) {            if (notes.length === 0) {
+
+                        setShowForm(false);                return (
+
+                    }                    <div className="empty-state">
+
+                };                        <p>Nenhuma anotação encontrada.</p>
+
                         <p>Crie sua primeira anotação clicando em "Nova Anotação"!</p>
-                    </div>
-                );
-            }
 
-            return (
-                <div className="notes-list">
-                    {notes.map(note => (
-                        <NoteCard
-                            key={note.id}
-                            note={note}
-                            onDelete={onDelete}
-                            onEdit={onEdit}
-                        />
-                    ))}
-                </div>
-            );
-        }
+                window.addEventListener('keydown', handleKeyDown);                    </div>
 
-        // Componente App principal
+                return () => window.removeEventListener('keydown', handleKeyDown);                );
+
+            }, [showForm, exportNotesDB]);            }
+
+
+
+            // Filtrar anotações localmente            return (
+
+            const filteredNotes = notes.filter(note => {                <div className="notes-list">
+
+                if (!searchTerm.trim()) return true;                    {notes.map(note => (
+
+                                        <NoteCard
+
+                if (searchType === 'subject') {                            key={note.id}
+
+                    return note.subject.toLowerCase().includes(searchTerm.toLowerCase());                            note={note}
+
+                } else if (searchType === 'date') {                            onDelete={onDelete}
+
+                    const noteDate = new Date(note.createdAt).toLocaleDateString('pt-BR');                            onEdit={onEdit}
+
+                    return noteDate.includes(searchTerm);                        />
+
+                } else if (searchType === 'content') {                    ))}
+
+                    return note.content.toLowerCase().includes(searchTerm.toLowerCase());                </div>
+
+                }            );
+
+                        }
+
+                return true;
+
+            });        // Componente App principal
+
         function App() {
-            const [notes, setNotes] = useLocalStorage('notes', []);
-            const [searchTerm, setSearchTerm] = React.useState('');
-            const [searchType, setSearchType] = React.useState('subject');
-            const [showForm, setShowForm] = React.useState(false);
+
+            // Handlers            const [notes, setNotes] = useLocalStorage('notes', []);
+
+            const handleAddNote = () => {            const [searchTerm, setSearchTerm] = React.useState('');
+
+                setEditingNote(null);            const [searchType, setSearchType] = React.useState('subject');
+
+                setShowForm(true);            const [showForm, setShowForm] = React.useState(false);
+
+            };
 
             const addNote = (note) => {
-                const newNote = {
-                    id: Date.now(),
-                    ...note,
-                    createdAt: new Date().toISOString()
+
+            const handleEditNote = (note) => {                const newNote = {
+
+                setEditingNote(note);                    id: Date.now(),
+
+                setShowForm(true);                    ...note,
+
+            };                    createdAt: new Date().toISOString()
+
                 };
-                setNotes(prevNotes => [newNote, ...prevNotes]);
-                setShowForm(false);
-            };
 
-            const deleteNote = (id) => {
-                setNotes(prevNotes => prevNotes.filter(note => note.id !== id));
-            };
+            const handleSaveNote = async (noteData) => {                setNotes(prevNotes => [newNote, ...prevNotes]);
 
-            const editNote = (id, updatedNote) => {
-                setNotes(prevNotes => 
-                    prevNotes.map(note => 
-                        note.id === id 
-                            ? { ...note, ...updatedNote, updatedAt: new Date().toISOString() }
-                            : note
-                    )
+                try {                setShowForm(false);
+
+                    if (editingNote) {            };
+
+                        await updateNote(editingNote.id, noteData);
+
+                        setMessage({ type: 'success', text: 'Anotação atualizada com sucesso!' });            const deleteNote = (id) => {
+
+                    } else {                setNotes(prevNotes => prevNotes.filter(note => note.id !== id));
+
+                        await addNote(noteData);            };
+
+                        setMessage({ type: 'success', text: 'Anotação adicionada com sucesso!' });
+
+                    }            const editNote = (id, updatedNote) => {
+
+                    setShowForm(false);                setNotes(prevNotes => 
+
+                    setEditingNote(null);                    prevNotes.map(note => 
+
+                } catch (error) {                        note.id === id 
+
+                    setMessage({ type: 'error', text: 'Erro ao salvar anotação' });                            ? { ...note, ...updatedNote, updatedAt: new Date().toISOString() }
+
+                    console.error('Erro ao salvar anotação:', error);                            : note
+
+                }                    )
+
                 );
-            };
 
-            // Atalhos de teclado
+                // Limpar mensagem após 3 segundos            };
+
+                setTimeout(() => setMessage(null), 3000);
+
+            };            // Atalhos de teclado
+
             React.useEffect(() => {
-                const handleKeyDown = (e) => {
-                    // Ctrl/Cmd + N para nova anotação
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
-                        e.preventDefault();
-                        setShowForm(true);
-                    }
-                    // Escape para fechar formulário
-                    if (e.key === 'Escape' && showForm) {
-                        setShowForm(false);
-                    }
-                };
 
-                window.addEventListener('keydown', handleKeyDown);
-                return () => window.removeEventListener('keydown', handleKeyDown);
+            const handleDeleteNote = async (id) => {                const handleKeyDown = (e) => {
+
+                if (window.confirm('Tem certeza que deseja excluir esta anotação?')) {                    // Ctrl/Cmd + N para nova anotação
+
+                    try {                    if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+
+                        await deleteNote(id);                        e.preventDefault();
+
+                        setMessage({ type: 'success', text: 'Anotação excluída com sucesso!' });                        setShowForm(true);
+
+                    } catch (error) {                    }
+
+                        setMessage({ type: 'error', text: 'Erro ao excluir anotação' });                    // Escape para fechar formulário
+
+                        console.error('Erro ao excluir anotação:', error);                    if (e.key === 'Escape' && showForm) {
+
+                    }                        setShowForm(false);
+
+                    }
+
+                    // Limpar mensagem após 3 segundos                };
+
+                    setTimeout(() => setMessage(null), 3000);
+
+                }                window.addEventListener('keydown', handleKeyDown);
+
+            };                return () => window.removeEventListener('keydown', handleKeyDown);
+
             }, [showForm]);
 
-            // Função para exportar anotações
-            const exportNotes = () => {
-                const dataStr = JSON.stringify(notes, null, 2);
+            const handleCancelForm = () => {
+
+                setShowForm(false);            // Função para exportar anotações
+
+                setEditingNote(null);            const exportNotes = () => {
+
+            };                const dataStr = JSON.stringify(notes, null, 2);
+
                 const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-                
-                const exportFileDefaultName = `anotacoes_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`;
-                
-                const linkElement = document.createElement('a');
-                linkElement.setAttribute('href', dataUri);
-                linkElement.setAttribute('download', exportFileDefaultName);
-                linkElement.click();
-            };
 
-            const filteredNotes = notes.filter(note => {
-                if (!searchTerm) return true;
-                
-                if (searchType === 'subject') {
-                    return note.subject.toLowerCase().includes(searchTerm.toLowerCase());
+            // Mostrar loading se ainda carregando dados                
+
+            if (isLoading) {                const exportFileDefaultName = `anotacoes_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`;
+
+                return (                
+
+                    <div className="app">                const linkElement = document.createElement('a');
+
+                        <Header />                linkElement.setAttribute('href', dataUri);
+
+                        <main className="main-content">                linkElement.setAttribute('download', exportFileDefaultName);
+
+                            <div className="loading-state">                linkElement.click();
+
+                                <div className="loader"></div>            };
+
+                                <p>Carregando anotações...</p>
+
+                            </div>            const filteredNotes = notes.filter(note => {
+
+                        </main>                if (!searchTerm) return true;
+
+                    </div>                
+
+                );                if (searchType === 'subject') {
+
+            }                    return note.subject.toLowerCase().includes(searchTerm.toLowerCase());
+
                 } else if (searchType === 'date') {
-                    const noteDate = new Date(note.createdAt).toLocaleDateString('pt-BR');
-                    return noteDate.includes(searchTerm);
-                }
-                
-                return true;
-            });
 
-            return (
-                <div className="app">
-                    <Header />
-                    <main className="main-content">
-                        <div className="controls">
-                            <SearchBar 
-                                searchTerm={searchTerm}
-                                setSearchTerm={setSearchTerm}
+            return (                    const noteDate = new Date(note.createdAt).toLocaleDateString('pt-BR');
+
+                <div className="app">                    return noteDate.includes(searchTerm);
+
+                    <Header                 }
+
+                        onAddNote={handleAddNote}                
+
+                        totalNotes={notes.length}                return true;
+
+                        onExportNotes={exportNotesDB}            });
+
+                    />
+
+                                return (
+
+                    <main className="main-content">                <div className="app">
+
+                        <SearchBar                     <Header />
+
+                            searchTerm={searchTerm}                    <main className="main-content">
+
+                            onSearchChange={setSearchTerm}                        <div className="controls">
+
+                            searchType={searchType}                            <SearchBar 
+
+                            onSearchTypeChange={setSearchType}                                searchTerm={searchTerm}
+
+                        />                                setSearchTerm={setSearchTerm}
+
                                 searchType={searchType}
-                                setSearchType={setSearchType}
-                            />
-                            <div className="actions-group">
-                                <div className="stats">
-                                    <span className="stats-item">📝 {notes.length} anotações</span>
+
+                        {error && (                                setSearchType={setSearchType}
+
+                            <div className="error-message">                            />
+
+                                ⚠️ {error}                            <div className="actions-group">
+
+                            </div>                                <div className="stats">
+
+                        )}                                    <span className="stats-item">📝 {notes.length} anotações</span>
+
                                     {searchTerm && (
-                                        <span className="stats-item">🔍 {filteredNotes.length} encontradas</span>
-                                    )}
-                                </div>
-                                <button 
-                                    className="export-btn"
+
+                        {message && (                                        <span className="stats-item">🔍 {filteredNotes.length} encontradas</span>
+
+                            <div className={message.type === 'error' ? 'error-message' : 'success-message'}>                                    )}
+
+                                {message.text}                                </div>
+
+                            </div>                                <button 
+
+                        )}                                    className="export-btn"
+
                                     onClick={exportNotes}
-                                    title="Exportar anotações"
-                                    disabled={notes.length === 0}
-                                >
-                                    📤 Exportar
-                                </button>
-                                <button 
-                                    className="add-note-btn"
-                                    onClick={() => setShowForm(!showForm)}
-                                    title="Nova anotação (Ctrl+N)"
-                                >
-                                    {showForm ? '❌ Cancelar' : '+ Nova Anotação'}
-                                </button>
-                            </div>
-                        </div>
 
-                        {showForm && (
-                            <NoteForm 
-                                onSubmit={addNote} 
-                                onCancel={() => setShowForm(false)}
-                            />
-                        )}
+                        <div className="notes-container">                                    title="Exportar anotações"
 
-                        <NotesList 
-                            notes={filteredNotes}
-                            onDelete={deleteNote}
-                            onEdit={editNote}
-                        />
-                    </main>
+                            {filteredNotes.length === 0 ? (                                    disabled={notes.length === 0}
+
+                                <div className="empty-state">                                >
+
+                                    {searchTerm ? (                                    📤 Exportar
+
+                                        <div>                                </button>
+
+                                            <h3>🔍 Nenhuma anotação encontrada</h3>                                <button 
+
+                                            <p>Tente ajustar sua busca ou criar uma nova anotação.</p>                                    className="add-note-btn"
+
+                                        </div>                                    onClick={() => setShowForm(!showForm)}
+
+                                    ) : (                                    title="Nova anotação (Ctrl+N)"
+
+                                        <div>                                >
+
+                                            <h3>📝 Nenhuma anotação ainda</h3>                                    {showForm ? '❌ Cancelar' : '+ Nova Anotação'}
+
+                                            <p>Clique em "Nova" para criar sua primeira anotação!</p>                                </button>
+
+                                        </div>                            </div>
+
+                                    )}                        </div>
+
+                                </div>
+
+                            ) : (                        {showForm && (
+
+                                <div className="notes-grid">                            <NoteForm 
+
+                                    {filteredNotes.map(note => (                                onSubmit={addNote} 
+
+                                        <NoteItem                                onCancel={() => setShowForm(false)}
+
+                                            key={note.id}                            />
+
+                                            note={note}                        )}
+
+                                            onEdit={handleEditNote}
+
+                                            onDelete={handleDeleteNote}                        <NotesList 
+
+                                        />                            notes={filteredNotes}
+
+                                    ))}                            onDelete={deleteNote}
+
+                                </div>                            onEdit={editNote}
+
+                            )}                        />
+
+                        </div>                    </main>
+
+                    </main>                </div>
+
+            );
+
+                    {showForm && (        }
+
+                        <NoteForm
+
+                            note={editingNote}        // Renderizar a aplicação
+
+                            onSave={handleSaveNote}        const root = ReactDOM.createRoot(document.getElementById('root'));
+
+                            onCancel={handleCancelForm}        root.render(<App />);
+
+                            isEditing={!!editingNote}    </script>
+
+                        /></body>
+
+                    )}</html>
                 </div>
             );
         }
 
         // Renderizar a aplicação
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
 </html>
